@@ -21,7 +21,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const email = formData.get("email");
   const password = formData.get("password");
-  const redirectTo = safeRedirect(formData.get("redirectTo"), "/");
+  const redirectTo = formData.get("redirectTo");
 
   if (!validateEmail(email)) {
     return json(
@@ -60,7 +60,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const user = await createUser(email, password);
 
   return createUserSession({
-    redirectTo,
+    redirectTo: typeof redirectTo === "string" ? redirectTo : "/videos",
     remember: false,
     request,
     userId: user.id,

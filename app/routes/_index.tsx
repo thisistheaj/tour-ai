@@ -1,9 +1,14 @@
 import type { MetaFunction } from "@remix-run/node";
 import { Link } from "@remix-run/react";
+import { redirect } from "@remix-run/node";
 
 import { useOptionalUser } from "~/utils";
 
 export const meta: MetaFunction = () => [{ title: "Remix Notes" }];
+
+export const loader = async () => {
+  return redirect("/videos");
+};
 
 export default function Index() {
   const user = useOptionalUser();
