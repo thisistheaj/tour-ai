@@ -24,16 +24,16 @@
   - [x] Otherwise → /listings/feed or /manager based on type
 
 ## 3. Onboarding Flow
-- [ ] Create /onboarding route with step handling
-- [ ] Step 1: User Type Selection
-  - [ ] Two-card choice between PM/Renter
-  - [ ] Save to user.userType
-- [ ] Step 2: Profile Details (based on userType)
-  - [ ] PM: Company name and contact form
-  - [ ] Renter: City selection dropdown
-- [ ] After completion, redirect to appropriate home:
-  - [ ] PMs → /manager
-  - [ ] Renters → /listings/feed
+- [x] Create /onboarding route with step handling
+- [x] Step 1: User Type Selection
+  - [x] Two-card choice between PM/Renter
+  - [x] Save to user.userType
+- [x] Step 2: Profile Details (based on userType)
+  - [x] PM: Company name and contact form
+  - [x] Renter: City selection dropdown
+- [x] After completion, redirect to appropriate home:
+  - [x] PMs → /manager
+  - [x] Renters → /listings.feed
 
 ## Notes
 - Use shadcn components

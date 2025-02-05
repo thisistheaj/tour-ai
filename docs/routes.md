@@ -41,10 +41,10 @@
 - `/manager/settings` - Account management
 
 ### Renter Routes
-- `/listings/feed` - Main video feed interface
-- `/listings/saved` - Saved properties
-- `/listings/:id` - Detailed listing view
-- `/listings/settings` - User preferences
+- `/listings/feed` → `/listings.feed` - Main video feed interface
+- `/listings/saved` → `/listings.saved` - Saved properties
+- `/listings/:id` → `/listings.$id` - Detailed listing view
+- `/listings/settings` → `/listings.settings` - User preferences
 
 ## Migration Notes
 - `videos._index.tsx` → `manager.listings.tsx`

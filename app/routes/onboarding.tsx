@@ -6,6 +6,13 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "~/com
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await getUser(request);
@@ -20,7 +27,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     return redirect("/manager");
   }
   if (user.userType === "RENTER" && user.city) {
-    return redirect("/listings/feed");
+    return redirect("/listings.feed");
   }
 
   // Determine which step to show
@@ -39,6 +46,7 @@ export async function action({ request }: ActionFunctionArgs) {
   const userType = formData.get("userType");
   const companyName = formData.get("companyName");
   const contactInfo = formData.get("contactInfo");
+  const city = formData.get("city");
 
   // Handle step 1 - user type selection
   if (userType === "PROPERTY_MANAGER" || userType === "RENTER") {
@@ -47,12 +55,19 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   // Handle step 2 - profile details
-  if (companyName && contactInfo) {
+  if (user.userType === "PROPERTY_MANAGER" && companyName && contactInfo) {
     await updateUserProfile(user.id, {
       companyName: companyName.toString(),
       contactInfo: contactInfo.toString(),
     });
     return redirect("/manager");
+  }
+
+  if (user.userType === "RENTER" && city) {
+    await updateUserProfile(user.id, {
+      city: city.toString(),
+    });
+    return redirect("/listings.feed");
   }
 
   return json({ error: "Invalid form submission" }, { status: 400 });
@@ -129,31 +144,53 @@ export default function Onboarding() {
           <div className="mx-auto max-w-md">
             <Card>
               <CardHeader>
-                <CardTitle>Property Manager Details</CardTitle>
+                <CardTitle>
+                  {user.userType === "PROPERTY_MANAGER" 
+                    ? "Property Manager Details" 
+                    : "Where are you looking?"}
+                </CardTitle>
                 <CardDescription>
-                  Help renters get in touch with you
+                  {user.userType === "PROPERTY_MANAGER"
+                    ? "Help renters get in touch with you"
+                    : "We'll show you available properties in your area"}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <Form method="post" className="space-y-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="companyName">Company or Business Name</Label>
-                    <Input
-                      id="companyName"
-                      name="companyName"
-                      required
-                      placeholder="Enter your company name"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="contactInfo">Contact Information</Label>
-                    <Input
-                      id="contactInfo"
-                      name="contactInfo"
-                      required
-                      placeholder="Phone number or email for inquiries"
-                    />
-                  </div>
+                  {user.userType === "PROPERTY_MANAGER" ? (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="companyName">Company or Business Name</Label>
+                        <Input
+                          id="companyName"
+                          name="companyName"
+                          required
+                          placeholder="Enter your company name"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="contactInfo">Contact Information</Label>
+                        <Input
+                          id="contactInfo"
+                          name="contactInfo"
+                          required
+                          placeholder="Phone number or email for inquiries"
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="space-y-2">
+                      <Label htmlFor="city">City</Label>
+                      <Select name="city" defaultValue="austin" required>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a city" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="austin">Austin, Texas</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
                   <Button type="submit" className="w-full">
                     Complete Setup
                   </Button>
