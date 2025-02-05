@@ -42,42 +42,42 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   // Step 1: Video Upload
   if (step === "1") {
-    if (typeof title !== "string" || typeof muxUploadId !== "string") {
+  if (typeof title !== "string" || typeof muxUploadId !== "string") {
+    return json(
+      { errors: { title: "Title is required", muxUploadId: "Upload required" } },
+      { status: 400 }
+    );
+  }
+
+  try {
+    // Get the upload status from Mux first
+    const upload = await mux.video.uploads.retrieve(muxUploadId);
+    
+    if (!upload.asset_id) {
       return json(
-        { errors: { title: "Title is required", muxUploadId: "Upload required" } },
+        { errors: { upload: "Video upload not yet processed" } },
         { status: 400 }
       );
     }
 
-    try {
-      // Get the upload status from Mux first
-      const upload = await mux.video.uploads.retrieve(muxUploadId);
-      
-      if (!upload.asset_id) {
-        return json(
-          { errors: { upload: "Video upload not yet processed" } },
-          { status: 400 }
-        );
-      }
-
-      // Get the asset details
-      const asset = await mux.video.assets.retrieve(upload.asset_id);
-      
+    // Get the asset details
+    const asset = await mux.video.assets.retrieve(upload.asset_id);
+    
       // Store asset details in session or return them to be stored in form state
       return json({ 
         success: true,
         assetId: asset.id,
         playbackId: asset.playback_ids?.[0]?.id,
-        status: asset.status,
+      status: asset.status,
         title: title
-      });
-    } catch (error) {
-      console.error("Error processing video:", error);
-      return json(
-        { errors: { upload: "Error processing video upload" } },
-        { status: 500 }
-      );
-    }
+    });
+  } catch (error) {
+    console.error("Error processing video:", error);
+    return json(
+      { errors: { upload: "Error processing video upload" } },
+      { status: 500 }
+    );
+  }
   }
 
   // Step 2: Property Details
@@ -235,38 +235,38 @@ export default function NewListing() {
 
             {step === 1 ? (
               <>
-                <div className="space-y-2">
+            <div className="space-y-2">
                   <Label htmlFor="title">Property Name</Label>
-                  <Input
-                    id="title"
-                    name="title"
+              <Input
+                id="title"
+                name="title"
                     placeholder="e.g., Luxury Downtown Loft, Modern South Austin Home..."
-                  />
-                  {actionData?.errors?.title && (
-                    <Alert variant="destructive">
-                      <AlertDescription>{actionData.errors.title}</AlertDescription>
-                    </Alert>
-                  )}
-                </div>
+              />
+              {actionData?.errors?.title && (
+                <Alert variant="destructive">
+                  <AlertDescription>{actionData.errors.title}</AlertDescription>
+                </Alert>
+              )}
+            </div>
 
-                {uploadUrl && (
-                  <div className="space-y-2">
+            {uploadUrl && (
+              <div className="space-y-2">
                     <Label>Property Tour</Label>
-                    <div className="border-2 border-dashed rounded-lg p-4">
-                      <mux-uploader
-                        className="w-full"
-                        endpoint={uploadUrl}
-                        onUploadStart={() => setIsUploading(true)}
-                        onSuccess={() => setIsUploading(false)}
-                        capture="environment"
-                        aspect-ratio="9:16"
-                        preferred-camera-facing-mode="user"
-                      />
-                    </div>
-                  </div>
-                )}
+                <div className="border-2 border-dashed rounded-lg p-4">
+                  <mux-uploader
+                    className="w-full"
+                    endpoint={uploadUrl}
+                    onUploadStart={() => setIsUploading(true)}
+                    onSuccess={() => setIsUploading(false)}
+                    capture="environment"
+                    aspect-ratio="9:16"
+                    preferred-camera-facing-mode="user"
+                  />
+                </div>
+              </div>
+            )}
 
-                <input type="hidden" name="muxUploadId" value={uploadId || ""} />
+            <input type="hidden" name="muxUploadId" value={uploadId || ""} />
               </>
             ) : step === 2 ? (
               <>
@@ -435,22 +435,22 @@ export default function NewListing() {
                   Back
                 </Button>
               )}
-              <Button 
-                type="submit" 
+            <Button 
+              type="submit" 
                 className={step === 1 ? "w-full" : ""}
-                disabled={isUploading || navigation.state === "submitting"}
-              >
-                {isUploading 
-                  ? "Uploading..." 
-                  : navigation.state === "submitting"
+              disabled={isUploading || navigation.state === "submitting"}
+            >
+              {isUploading 
+                ? "Uploading..." 
+                : navigation.state === "submitting"
                   ? "Posting..."
                   : step === 1
                   ? "Continue to Property Details"
                   : step === 2
                   ? "Preview Tour"
                   : "Share Tour"
-                }
-              </Button>
+              }
+            </Button>
             </div>
           </Form>
         </CardContent>

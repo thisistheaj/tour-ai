@@ -102,4 +102,56 @@ export async function deleteVideo({
       userId // Ensure user owns the video
     },
   });
+}
+
+export async function getSavedListings(userId: string) {
+  return prisma.savedListing.findMany({
+    where: { userId },
+    include: {
+      video: {
+        include: {
+          user: {
+            select: {
+              email: true,
+              companyName: true,
+              contactInfo: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+export async function isListingSaved(userId: string, videoId: string) {
+  const savedListing = await prisma.savedListing.findUnique({
+    where: {
+      userId_videoId: {
+        userId,
+        videoId,
+      },
+    },
+  });
+  return !!savedListing;
+}
+
+export async function saveListing(userId: string, videoId: string) {
+  return prisma.savedListing.create({
+    data: {
+      user: { connect: { id: userId } },
+      video: { connect: { id: videoId } },
+    },
+  });
+}
+
+export async function unsaveListing(userId: string, videoId: string) {
+  return prisma.savedListing.delete({
+    where: {
+      userId_videoId: {
+        userId,
+        videoId,
+      },
+    },
+  });
 } 

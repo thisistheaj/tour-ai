@@ -26,22 +26,22 @@ As a renter, I want to set up my apartment search
 ## Story 4: Browse Listings
 As a renter, I want to browse listings in a TikTok-style interface
 -[x] Can swipe vertically through continuous feed of apartment videos
--[ ] Can see price, location, beds/baths overlay while watching
--[ ] Can tap to expand/collapse full property description
+-[x] Can see price, location, beds/baths overlay while watching
+-[x] Can tap to expand/collapse full property description
 -[x] Videos autoplay and loop like TikTok
 -[x] Feed only shows listings from selected city
 
 ## Story 5: Save Listings
 As a renter, I want to save and review listings
--[ ] Can double-tap to save a property
--[ ] Can un-save a property
--[ ] Can view list of saved properties
--[ ] Can access saved property details and videos
+-[x] Can double-tap to save a property
+-[x] Can un-save a property
+-[x] Can view list of saved properties
+-[x] Can access saved property details and videos
 
 ## Story 6: Contact Property Managers
 As a renter, I want to contact property managers
--[ ] Can view contact information for each listing
--[ ] Can tap to initiate contact (email/phone) directly from the app
+-[x] Can view contact information for each listing
+-[x] Can tap to initiate contact (email/phone) directly from the app
 
 # tech requirements
 -[x] migrate from sqlite to postgres
