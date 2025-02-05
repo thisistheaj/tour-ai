@@ -13,9 +13,9 @@ As a property manager, I want to create a new listing
 ## Story 2: Manage Listings
 As a property manager, I want to manage my listings
 -[x] Can view all my listed properties
--[ ] Can edit listing details
--[ ] Can toggle listing visibility
--[ ] Can delete listings
+-[x] Can edit listing details
+-[x] Can toggle listing visibility
+-[x] Can delete listings
 
 ## Story 3: Set Up Search
 As a renter, I want to set up my apartment search
