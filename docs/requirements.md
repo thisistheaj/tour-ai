@@ -13,8 +13,8 @@ As a property manager, I want to create a new listing
 ## Story 2: Manage Listings
 As a property manager, I want to manage my listings
 -[x] Can view all my listed properties
--[x] Can edit listing details
--[x] Can toggle listing visibility
+-[ ] Can edit listing details
+-[ ] Can toggle listing visibility
 -[ ] Can delete listings
 
 ## Story 3: Set Up Search
@@ -26,7 +26,7 @@ As a renter, I want to set up my apartment search
 ## Story 4: Browse Listings
 As a renter, I want to browse listings in a TikTok-style interface
 -[x] Can swipe vertically through continuous feed of apartment videos
--[x] Can see price, location, beds/baths overlay while watching
+-[ ] Can see price, location, beds/baths overlay while watching
 -[ ] Can tap to expand/collapse full property description
 -[x] Videos autoplay and loop like TikTok
 -[x] Feed only shows listings from selected city
