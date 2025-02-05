@@ -8,6 +8,7 @@
 - `routes/join.tsx` - Sign up page
 - `routes/login.tsx` - Login page
 - `routes/logout.tsx` - Logout handler
+- `routes/onboarding.tsx` - User type & profile setup
 
 ### Video Processing
 - `routes/videos.upload.tsx` - Video upload page
@@ -28,7 +29,6 @@
 - `routes/listings.saved.tsx` - Saved listings page
 - `routes/listings.$id.tsx` - Individual listing view
 - `routes/listings.settings.tsx` - User settings & preferences
-- `routes/listings.onboarding.tsx` - City selection during first login
 
 ## Route Details
 
@@ -36,7 +36,7 @@
 - `/login` - Email/password login
 - `/join` - New user registration
 - `/logout` - Session termination
-- `/listings/onboarding` - First-time city selection
+- `/onboarding` - User type selection and profile completion
 
 ### Property Manager Routes
 - `/manager` - Dashboard home
