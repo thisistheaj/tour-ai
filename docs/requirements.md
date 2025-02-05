@@ -44,7 +44,7 @@ As a renter, I want to contact property managers
 -[ ] Can tap to initiate contact (email/phone) directly from the app
 
 # tech requirements
--[ ] migrate from sqlite to postgres
+-[x] migrate from sqlite to postgres
 -[ ] setup mux premium for longer videos
 -[ ] get 20 test videos / listings
--[ ] setup service worker for PWA
+-[x] setup service worker for PWA
