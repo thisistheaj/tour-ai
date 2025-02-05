@@ -34,7 +34,7 @@ export default function Index() {
             className="absolute inset-0 bg-cover bg-center" 
             style={{ backgroundImage: 'url(/tour-ai-hero-full.png)' }} 
           />
-        </div>
+            </div>
         
         <div className="absolute inset-0 z-20 flex items-center">
           <div className="container mx-auto px-4">
@@ -135,7 +135,7 @@ export default function Index() {
           <Button asChild size="lg" className="bg-white text-amber-700 hover:bg-white/90">
             <Link to="/join">Get Started Now <ArrowRight className="ml-2 h-4 w-4" /></Link>
           </Button>
-        </div>
+      </div>
       </section>
     </main>
   );
