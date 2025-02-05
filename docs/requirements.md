@@ -48,3 +48,15 @@ As a renter, I want to contact property managers
 -[x] setup mux premium for longer videos
 -[ ] get 20 test videos / listings
 -[x] setup service worker for PWA
+
+Design reqs:
+-[ ] bootstrap high convverting landing page with description.md
+-[ ] add a video to the landing page
+-[ ] make app ready for portfolio demo
+
+## Todos (scrap):
+- [ ] basic dummy data? 
+- [ ] take MVP Video
+- [ ] stitch mvp video
+
+- [ ]
