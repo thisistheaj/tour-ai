@@ -107,6 +107,9 @@ export default function UploadVideo() {
                     endpoint={uploadUrl}
                     onUploadStart={() => setIsUploading(true)}
                     onSuccess={() => setIsUploading(false)}
+                    capture="environment"
+                    aspect-ratio="9:16"
+                    preferred-camera-facing-mode="user"
                   />
                 </div>
               </div>

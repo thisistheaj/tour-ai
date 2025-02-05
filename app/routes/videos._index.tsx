@@ -6,6 +6,7 @@ import { requireUserId } from "~/session.server";
 import { getVideoListItems } from "~/models/video.server";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Play } from "lucide-react";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const userId = await requireUserId(request);
@@ -20,9 +21,17 @@ export default function VideoList() {
     <div className="container mx-auto p-4">
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-3xl font-bold">Your Videos</h2>
-        <Button asChild>
-          <Link to="upload">Upload New Video</Link>
-        </Button>
+        <div className="flex gap-4">
+          <Button asChild variant="outline">
+            <Link to="/feed">
+              <Play className="w-4 h-4 mr-2" />
+              Watch Feed
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link to="upload">Upload New Video</Link>
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
