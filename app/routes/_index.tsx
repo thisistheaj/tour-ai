@@ -1,171 +1,142 @@
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { Link } from "@remix-run/react";
 import { redirect } from "@remix-run/node";
-import type { UserType } from "@prisma/client";
+import type { User } from "@prisma/client";
 import { getUser } from "~/session.server";
-
 import { useOptionalUser } from "~/utils";
+import { Button } from "~/components/ui/button";
+import { 
+  Video, 
+  Clock, 
+  MessageSquareText,
+  ArrowRight,
+  CheckCircle2
+} from "lucide-react";
 
-export const meta: MetaFunction = () => [{ title: "TourAI" }];
+export const meta: MetaFunction = () => [{ title: "TourAI - Your AI Apartment Tour Guide" }];
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const user = await getUser(request);
-
-  // Not logged in -> login
-  if (!user) {
-    return redirect("/login");
-  }
-
-  // No user type -> onboarding
-  if (!user.userType) {
-    return redirect("/onboarding");
-  }
-
-  // Renter without city -> onboarding
-  if (user.userType === "RENTER" && !user.city) {
-    return redirect("/onboarding");
-  }
-
-  // PM without company info -> onboarding
-  if (user.userType === "PROPERTY_MANAGER" && !user.companyName) {
-    return redirect("/onboarding");
-  }
-
-  // Redirect to appropriate home based on user type
+  const user = await getUser(request) as User | null;
+  if (!user) return null;
+  if (!user.userType) return redirect("/onboarding");
+  if (user.userType === "RENTER" && !user.city) return redirect("/onboarding");
+  if (user.userType === "PROPERTY_MANAGER" && !user.companyName) return redirect("/onboarding");
   return redirect(user.userType === "PROPERTY_MANAGER" ? "/manager" : "/listings/feed");
 };
 
 export default function Index() {
-  const user = useOptionalUser();
   return (
-    <main className="relative min-h-screen bg-white sm:flex sm:items-center sm:justify-center">
-      <div className="relative sm:pb-16 sm:pt-8">
-        <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-          <div className="relative shadow-xl sm:overflow-hidden sm:rounded-2xl">
-            <div className="absolute inset-0">
-              <img
-                className="h-full w-full object-cover"
-                src="https://user-images.githubusercontent.com/1500684/157774694-99820c51-8165-4908-a031-34fc371ac0d6.jpg"
-                alt="Sonic Youth On Stage"
-              />
-              <div className="absolute inset-0 bg-[color:rgba(254,204,27,0.5)] mix-blend-multiply" />
-            </div>
-            <div className="relative px-4 pb-8 pt-16 sm:px-6 sm:pb-14 sm:pt-24 lg:px-8 lg:pb-20 lg:pt-32">
-              <h1 className="text-center text-6xl font-extrabold tracking-tight sm:text-8xl lg:text-9xl">
-                <span className="block uppercase text-yellow-500 drop-shadow-md">
-                  Indie Stack
-                </span>
-              </h1>
-              <p className="mx-auto mt-6 max-w-lg text-center text-xl text-white sm:max-w-3xl">
-                Check the README.md file for instructions on how to get this
-                project deployed.
-              </p>
-              <div className="mx-auto mt-10 max-w-sm sm:flex sm:max-w-none sm:justify-center">
-                {user ? (
-                  <Link
-                    to="/notes"
-                    className="flex items-center justify-center rounded-md border border-transparent bg-white px-4 py-3 text-base font-medium text-yellow-700 shadow-sm hover:bg-yellow-50 sm:px-8"
-                  >
-                    View Notes for {user.email}
-                  </Link>
-                ) : (
-                  <div className="space-y-4 sm:mx-auto sm:inline-grid sm:grid-cols-2 sm:gap-5 sm:space-y-0">
-                    <Link
-                      to="/join"
-                      className="flex items-center justify-center rounded-md border border-transparent bg-white px-4 py-3 text-base font-medium text-yellow-700 shadow-sm hover:bg-yellow-50 sm:px-8"
-                    >
-                      Sign up
-                    </Link>
-                    <Link
-                      to="/login"
-                      className="flex items-center justify-center rounded-md bg-yellow-500 px-4 py-3 font-medium text-white hover:bg-yellow-600"
-                    >
-                      Log In
-                    </Link>
-                  </div>
-                )}
-              </div>
-              <a href="https://remix.run">
-                <img
-                  src="https://user-images.githubusercontent.com/1500684/158298926-e45dafff-3544-4b69-96d6-d3bcc33fc76a.svg"
-                  alt="Remix"
-                  className="mx-auto mt-16 w-full max-w-[12rem] md:max-w-[16rem]"
-                />
-              </a>
-            </div>
-          </div>
+    <main className="min-h-screen bg-white">
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/40 z-10" />
+        <div className="h-[600px] bg-gray-900">
+          <div 
+            className="absolute inset-0 bg-cover bg-center" 
+            style={{ backgroundImage: 'url(/tour-ai-hero-full.png)' }} 
+          />
         </div>
-
-        <div className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8">
-          <div className="mt-6 flex flex-wrap justify-center gap-8">
-            {[
-              {
-                src: "https://user-images.githubusercontent.com/1500684/157764397-ccd8ea10-b8aa-4772-a99b-35de937319e1.svg",
-                alt: "Fly.io",
-                href: "https://fly.io",
-              },
-              {
-                src: "https://user-images.githubusercontent.com/1500684/157764395-137ec949-382c-43bd-a3c0-0cb8cb22e22d.svg",
-                alt: "SQLite",
-                href: "https://sqlite.org",
-              },
-              {
-                src: "https://user-images.githubusercontent.com/1500684/157764484-ad64a21a-d7fb-47e3-8669-ec046da20c1f.svg",
-                alt: "Prisma",
-                href: "https://prisma.io",
-              },
-              {
-                src: "https://user-images.githubusercontent.com/1500684/157764276-a516a239-e377-4a20-b44a-0ac7b65c8c14.svg",
-                alt: "Tailwind",
-                href: "https://tailwindcss.com",
-              },
-              {
-                src: "https://user-images.githubusercontent.com/1500684/157764454-48ac8c71-a2a9-4b5e-b19c-edef8b8953d6.svg",
-                alt: "Cypress",
-                href: "https://www.cypress.io",
-              },
-              {
-                src: "https://user-images.githubusercontent.com/1500684/157772386-75444196-0604-4340-af28-53b236faa182.svg",
-                alt: "MSW",
-                href: "https://mswjs.io",
-              },
-              {
-                src: "https://user-images.githubusercontent.com/1500684/157772447-00fccdce-9d12-46a3-8bb4-fac612cdc949.svg",
-                alt: "Vitest",
-                href: "https://vitest.dev",
-              },
-              {
-                src: "https://user-images.githubusercontent.com/1500684/157772662-92b0dd3a-453f-4d18-b8be-9fa6efde52cf.png",
-                alt: "Testing Library",
-                href: "https://testing-library.com",
-              },
-              {
-                src: "https://user-images.githubusercontent.com/1500684/157772934-ce0a943d-e9d0-40f8-97f3-f464c0811643.svg",
-                alt: "Prettier",
-                href: "https://prettier.io",
-              },
-              {
-                src: "https://user-images.githubusercontent.com/1500684/157772990-3968ff7c-b551-4c55-a25c-046a32709a8e.svg",
-                alt: "ESLint",
-                href: "https://eslint.org",
-              },
-              {
-                src: "https://user-images.githubusercontent.com/1500684/157773063-20a0ed64-b9f8-4e0b-9d1e-0b65a3d4a6db.svg",
-                alt: "TypeScript",
-                href: "https://typescriptlang.org",
-              },
-            ].map((img) => (
-              <a
-                key={img.href}
-                href={img.href}
-                className="flex h-16 w-32 justify-center p-1 grayscale transition hover:grayscale-0 focus:grayscale-0"
-              >
-                <img alt={img.alt} src={img.src} className="object-contain" />
-              </a>
-            ))}
+        
+        <div className="absolute inset-0 z-20 flex items-center">
+          <div className="container mx-auto px-4">
+            <div className="max-w-2xl">
+              <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+                Your AI Apartment Tour Guide
+              </h1>
+              <p className="text-xl text-white/90 mb-8">
+                Transform your apartment hunt with immersive video tours and an AI assistant that knows every detail about each property. No more scheduling multiple in-person visits.
+              </p>
+              <div className="flex gap-4">
+                <Button asChild size="lg" className="bg-amber-700 hover:bg-amber-800">
+                  <Link to="/join">Get Started <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+                  <Link to="/login">Sign In</Link>
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-12">Why Choose TourAI?</h2>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="p-6 rounded-lg border border-gray-200 shadow-sm bg-white">
+              <Video className="h-10 w-10 text-amber-700 mb-4" />
+              <h3 className="text-xl font-semibold mb-2">Immersive Video Tours</h3>
+              <p className="text-gray-600">Browse through high-quality video walkthroughs that make you feel like you're there in person.</p>
+            </div>
+
+            <div className="p-6 rounded-lg border border-gray-200 shadow-sm bg-white">
+              <MessageSquareText className="h-10 w-10 text-amber-700 mb-4" />
+              <h3 className="text-xl font-semibold mb-2">AI Tour Guide</h3>
+              <p className="text-gray-600">Ask questions and get instant answers about any property detail from our intelligent AI assistant.</p>
+            </div>
+
+            <div className="p-6 rounded-lg border border-gray-200 shadow-sm bg-white">
+              <Clock className="h-10 w-10 text-amber-700 mb-4" />
+              <h3 className="text-xl font-semibold mb-2">Save Time</h3>
+              <p className="text-gray-600">No more scheduling conflicts or wasted trips. Tour properties on your own schedule.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-3xl font-bold text-center mb-12">Everything You Need</h2>
+            
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <CheckCircle2 className="h-6 w-6 text-amber-700 mt-1 flex-shrink-0" />
+                <div>
+                  <h3 className="text-xl font-semibold mb-1">TikTok-Style Interface</h3>
+                  <p className="text-gray-600">Swipe through property tours with our intuitive, engaging interface.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <CheckCircle2 className="h-6 w-6 text-amber-700 mt-1 flex-shrink-0" />
+                <div>
+                  <h3 className="text-xl font-semibold mb-1">Smart Property Matching</h3>
+                  <p className="text-gray-600">Our AI learns your preferences to show you properties you'll love.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <CheckCircle2 className="h-6 w-6 text-amber-700 mt-1 flex-shrink-0" />
+                <div>
+                  <h3 className="text-xl font-semibold mb-1">Instant Information</h3>
+                  <p className="text-gray-600">Get detailed property information, pricing, and availability in real-time.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <CheckCircle2 className="h-6 w-6 text-amber-700 mt-1 flex-shrink-0" />
+                <div>
+                  <h3 className="text-xl font-semibold mb-1">Save & Compare</h3>
+                  <p className="text-gray-600">Bookmark your favorite properties and easily compare their features.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 bg-gradient-to-br from-amber-700 to-amber-800">
+        <div className="container mx-auto px-4 text-center">
+          <h2 className="text-3xl font-bold text-white mb-6">Ready to Transform Your Apartment Search?</h2>
+          <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+            Join thousands of renters who have found their perfect home using TourAI's intelligent apartment touring platform.
+          </p>
+          <Button asChild size="lg" className="bg-white text-amber-700 hover:bg-white/90">
+            <Link to="/join">Get Started Now <ArrowRight className="ml-2 h-4 w-4" /></Link>
+          </Button>
+        </div>
+      </section>
     </main>
   );
 }
