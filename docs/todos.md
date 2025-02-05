@@ -38,3 +38,70 @@
 - Maintain mobile-first design
 - Keep error messages clear and actionable
 - Consider optimistic UI updates 
+
+# TikTok-Style Listing Feed Implementation
+
+## Principles
+- Keep UI minimal and focused on the video
+- Ensure all property details are easily visible
+- Make interactions intuitive and smooth
+- Follow TikTok's proven UX patterns
+
+## 1. Property Info Overlay
+-[ ] Add persistent property details overlay
+  - Price in large text
+  - Beds/baths count
+  - Location (city/neighborhood)
+  - Available/unavailable status
+-[ ] Style overlay with gradient background for readability
+-[ ] Position overlay at bottom of screen
+-[ ] Ensure text is readable on any video background
+
+## 2. Property Description
+-[ ] Add expandable description panel
+  - Collapsed by default
+  - Shows first 2 lines when collapsed
+  - Full screen overlay when expanded
+-[ ] Add tap-to-expand interaction
+-[ ] Add smooth expand/collapse animation
+-[ ] Include all property details in expanded view:
+  - Full description
+  - Amenities
+  - Contact information
+  - Map preview
+
+## 3. Video Player Improvements
+-[ ] Remove unnecessary player controls
+-[ ] Add loading state for video buffering
+-[ ] Add double-tap to like interaction
+-[ ] Add progress bar at top of screen
+
+## 4. Navigation
+-[ ] Improve swipe sensitivity
+-[ ] Add pull-to-refresh at top
+-[ ] Add infinite scroll loading
+-[ ] Remove navigation hints (up/down arrows)
+-[ ] Add haptic feedback on swipe
+
+## 5. Action Buttons & Sharing
+-[ ] Simplify side buttons to essential actions:
+  - Like/Save
+  - Share
+  - Contact
+-[ ] Remove message/comment functionality
+-[ ] Add contact button that shows PM details
+-[ ] Create individual video page route (`/listings/$id`)
+-[ ] Add share functionality that links to individual page
+
+## 6. Performance Optimization (Optional)
+-[ ] Add placeholder thumbnails
+-[ ] Optimize animation performance
+-[ ] Add error boundaries for failed video loads
+-[ ] Implement retry mechanism for failed loads
+-[ ] Optimize video preloading (next/previous)
+
+## Notes
+- Focus on core viewing experience first
+- Keep interactions simple and intuitive
+- Prioritize video playback performance
+- Follow mobile-first design principles 
