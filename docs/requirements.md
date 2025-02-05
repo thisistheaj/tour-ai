@@ -42,3 +42,8 @@ As a renter, I want to save and review listings
 As a renter, I want to contact property managers
 * Can view contact information for each listing
 * Can tap to initiate contact (email/phone) directly from the app
+
+# tech requirements
+-[ ] migrate from sqlite to postgres
+-[ ] setup mux premium for longer videos
+-[ ] get 20 test videos / listings
