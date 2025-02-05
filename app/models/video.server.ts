@@ -19,22 +19,33 @@ export function getVideoListItems({ userId }: { userId: User["id"] }) {
   });
 }
 
-export function createVideo({
-  title,
+export type { Video } from "@prisma/client";
+
+interface CreateVideoInput {
+  title: string;
+  userId: string;
+  muxAssetId: string;
+  muxPlaybackId: string;
+  status: string;
+  price?: number;
+  address?: string;
+  city?: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  description?: string;
+  available?: boolean;
+}
+
+export async function createVideo({
   userId,
-  muxAssetId,
-  muxPlaybackId,
-  status,
-}: Pick<Video, "title" | "muxAssetId" | "muxPlaybackId" | "status"> & {
-  userId: User["id"];
-}) {
+  ...input
+}: CreateVideoInput) {
   return prisma.video.create({
     data: {
-      title,
-      userId,
-      muxAssetId,
-      muxPlaybackId,
-      status,
+      ...input,
+      user: {
+        connect: { id: userId }
+      }
     },
   });
 }

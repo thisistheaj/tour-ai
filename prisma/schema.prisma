@@ -55,10 +55,21 @@ model Video {
   muxAssetId    String?
   muxPlaybackId String?
   status        String   @default("pending")
+  
+  // Property details
+  price         Decimal? @db.Decimal(10,2)
+  address       String?
+  city          String?
+  bedrooms      Int?
+  bathrooms     Int?
+  description   String?  @db.Text
+  available     Boolean  @default(true)
+
   userId        String
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   @@index([userId])
+  @@index([city])
 }
