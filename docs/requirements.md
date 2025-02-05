@@ -50,7 +50,7 @@ As a renter, I want to contact property managers
 -[x] setup service worker for PWA
 
 Design reqs:
--[ ] bootstrap high convverting landing page with description.md
+-[x] bootstrap high convverting landing page with description.md
 -[ ] add a video to the landing page
 -[ ] make app ready for portfolio demo
 
@@ -61,9 +61,7 @@ Design reqs:
 
 # Tech Debt
 -[x] migrate /videos routes to new /manager structure
--[ ] clean up unused routes and components
+-[x] clean up unused routes and components
 -[x] standardize route naming convention
 -[ ] add proper error boundaries
 -[x] improve type safety across routes
-
-- [ ]
