@@ -60,4 +60,46 @@ export function updateVideoMuxInfo({
     where: { id },
     data: { muxAssetId, muxPlaybackId, status },
   });
+}
+
+interface UpdateVideoInput {
+  id: string;
+  userId: string;
+  title: string;
+  price?: number;
+  address?: string;
+  city?: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  description?: string;
+  available?: boolean;
+}
+
+export async function updateVideo({
+  id,
+  userId,
+  ...input
+}: UpdateVideoInput) {
+  return prisma.video.update({
+    where: { 
+      id,
+      userId // Ensure user owns the video
+    },
+    data: input,
+  });
+}
+
+export async function deleteVideo({
+  id,
+  userId,
+}: {
+  id: string;
+  userId: string;
+}) {
+  return prisma.video.delete({
+    where: { 
+      id,
+      userId // Ensure user owns the video
+    },
+  });
 } 

@@ -6,46 +6,35 @@
 - Avoid duplicate work across sections
 - Use existing data/fields to determine state instead of adding flags
 
-# Create Listing Implementation
+# Edit Listing Implementation
 
-## 1. Database Schema Updates
-- [x] Add new fields to Video model:
-  - [x] price (Decimal)
-  - [x] address (String)
-  - [x] city (String)
-  - [x] bedrooms (Int)
-  - [x] bathrooms (Int)
-  - [x] description (String)
-  - [x] available (Boolean)
-- [x] Run migrations
+## 1. Create Edit Route and Form
+-[x] Create `manager.edit.$id.tsx` route
+-[x] Add loader to fetch video data
+-[x] Create form with existing video data pre-filled
+-[x] Add validation for required fields
+-[x] Style form using shadcn components
 
-## 2. Update Create Listing Form
-- [x] Create multi-step form in manager.new:
-  - [x] Step 1: Basic Info (existing video upload)
-  - [x] Step 2: Property Details
-    - [x] Price input with validation
-    - [x] Address input
-    - [x] City selection (match renter cities)
-    - [x] Beds/baths number inputs
-    - [x] Description textarea
-    - [x] Availability toggle
-- [x] Add form state management
-- [x] Add loading states
-- [x] Add error handling
+## 2. Server-side Implementation
+-[x] Add updateVideo function to video.server.ts
+-[x] Add action handler for form submission
+-[x] Add error handling for invalid/missing data
+-[x] Add success message and redirect
 
-## 3. Server-side Implementation
-- [x] Update video creation endpoint
-- [x] Add input validation
-- [x] Add error handling
+## 3. Delete Functionality
+-[x] Add delete button with confirmation dialog
+-[x] Add deleteVideo function to video.server.ts
+-[ ] Handle video deletion in Mux (TODO later)
+-[x] Add success message and redirect to dashboard
 
 ## 4. UI/UX Improvements
-- [ ] Add progress indicator for form steps
-- [ ] Add preview of entered information
-- [ ] Add confirmation before final submission
-- [ ] Add success message and redirect
+-[x] Add loading states for form submission
+-[x] Add error messages for validation
+-[ ] Add unsaved changes warning
+-[x] Add preview of current video
 
 ## Notes
-- Use shadcn components for consistency
+- Reuse components from create listing form
 - Maintain mobile-first design
 - Keep error messages clear and actionable
-- Consider adding save draft functionality 
+- Consider optimistic UI updates 
