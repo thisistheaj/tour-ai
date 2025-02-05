@@ -1,73 +1,174 @@
 import { json, redirect, type LoaderFunctionArgs } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
-import { getUser } from "~/session.server";
+import { requireUser } from "~/session.server";
+import { getVideoListItems } from "~/models/video.server";
 import { Button } from "~/components/ui/button";
+import { PlusCircle, Home, Settings, LogOut, Play } from "lucide-react";
+import type { Video } from "~/models/video.server";
+import { prisma } from "~/db.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const user = await getUser(request);
-  if (!user) {
-    return redirect("/login");
-  }
-  if (user.userType !== "PROPERTY_MANAGER") {
-    return redirect("/");
-  }
-  return json({ user });
+  const user = await requireUser(request);
+  const videos = await getVideoListItems({ userId: user.id });
+  return json({ user, videos });
 }
 
 export default function ManagerDashboard() {
-  const { user } = useLoaderData<typeof loader>();
+  const { user, videos } = useLoaderData<typeof loader>();
 
   return (
-    <div className="flex min-h-screen flex-col">
-      {/* Header */}
-      <header className="border-b">
-        <div className="container flex h-16 items-center px-4">
-          <div className="mr-8 font-semibold">TourAI Manager</div>
-          <nav className="flex items-center space-x-4 lg:space-x-6">
-            <Button asChild variant="ghost">
-              <Link to="/manager/listings">My Listings</Link>
-            </Button>
-            <Button asChild variant="ghost">
-              <Link to="/manager/new">Add Listing</Link>
-            </Button>
-            <Button asChild variant="ghost">
-              <Link to="/manager/settings">Settings</Link>
-            </Button>
-          </nav>
-          <div className="ml-auto flex items-center space-x-4">
-            <span className="text-sm text-gray-500">{user.email}</span>
-            <Button asChild variant="outline">
-              <Link to="/logout">Logout</Link>
-            </Button>
+    <div className="min-h-screen bg-gray-50">
+      {/* Fixed Header */}
+      <header className="fixed top-0 left-0 right-0 bg-white border-b z-10">
+        <div className="container mx-auto px-4">
+          <div className="h-16 flex items-center justify-between">
+            <div className="font-semibold">TourAI</div>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/listings/feed">
+                  <Play className="w-5 h-5" />
+                </Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/manager/settings">
+                  <Settings className="w-5 h-5" />
+                </Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/logout">
+                  <LogOut className="w-5 h-5" />
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Main content */}
-      <main className="flex-1 container py-8">
-        <h1 className="text-3xl font-bold mb-8">Welcome to TourAI Manager</h1>
-        
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <Link to="/manager/listings">
-            <div className="p-6 border rounded-lg hover:border-blue-500 transition-colors">
-              <h2 className="text-xl font-semibold mb-2">My Listings</h2>
-              <p className="text-gray-600">View and manage your property listings</p>
+      {/* Main Content */}
+      <main className="container mx-auto px-4 pt-20 pb-24">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold">Welcome back!</h1>
+          <p className="text-gray-600 mt-1">
+            {videos.length > 0 
+              ? `You have ${videos.length} property tour${videos.length === 1 ? '' : 's'}`
+              : 'Start sharing your properties with video tours'
+            }
+          </p>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="grid gap-4 mb-8">
+          <Button 
+            size="lg" 
+            className="w-full flex items-center justify-center gap-2 h-auto py-6"
+            asChild
+          >
+            <Link to="/manager/new">
+              <PlusCircle className="w-6 h-6" />
+              <div>
+                <div className="font-semibold">Record New Tour</div>
+                <div className="text-sm opacity-90">Share your property with potential renters</div>
+              </div>
+            </Link>
+          </Button>
+
+          <Button 
+            variant="outline"
+            size="lg"
+            className="w-full flex items-center justify-center gap-2 h-auto py-6"
+            asChild
+          >
+            <Link to="/listings/feed">
+              <Play className="w-6 h-6" />
+              <div>
+                <div className="font-semibold">Preview Feed</div>
+                <div className="text-sm opacity-90">See how renters view your tours</div>
+              </div>
+            </Link>
+          </Button>
+        </div>
+
+        {/* Property Tours List */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Your Property Tours</h2>
+            {videos.length > 0 && (
+              <span className="text-sm text-gray-500">
+                {videos.filter((video: Video) => video.available).length} available
+              </span>
+            )}
+          </div>
+
+          {videos.length === 0 ? (
+            <div className="text-center py-12 bg-white rounded-lg border">
+              <div className="mb-4">
+                <Home className="w-12 h-12 mx-auto text-gray-400" />
+              </div>
+              <h3 className="font-medium mb-2">No tours yet</h3>
+              <p className="text-gray-600 text-sm mb-4">
+                Start by recording a tour of your first property
+              </p>
+              <Button asChild>
+                <Link to="/manager/new">Record First Tour</Link>
+              </Button>
             </div>
-          </Link>
-          
-          <Link to="/manager/new">
-            <div className="p-6 border rounded-lg hover:border-blue-500 transition-colors">
-              <h2 className="text-xl font-semibold mb-2">Add New Listing</h2>
-              <p className="text-gray-600">Create a new property listing with video tour</p>
+          ) : (
+            <div className="grid gap-4">
+              {videos.map((video: Video) => (
+                <Link
+                  key={video.id}
+                  to={`/manager/edit/${video.id}`}
+                  className="block bg-white rounded-lg border p-4 hover:border-blue-500 transition-colors"
+                >
+                  <div className="flex items-start gap-4">
+                    {/* Video Thumbnail */}
+                    <div className="relative aspect-[9/16] w-24 bg-gray-100 rounded overflow-hidden">
+                      {video.muxPlaybackId ? (
+                        <img
+                          src={`https://image.mux.com/${video.muxPlaybackId}/thumbnail.jpg`}
+                          alt={video.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                          <p className="text-xs text-gray-500">Processing...</p>
+                        </div>
+                      )}
+                      {video.status === 'ready' && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 hover:opacity-100 transition-opacity">
+                          <Play className="w-8 h-8 text-white" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Video Info */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium truncate">{video.title}</h3>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {video.bedrooms} beds • {video.bathrooms} baths
+                      </p>
+                      <p className="text-sm text-gray-600 mt-1 truncate">
+                        {video.address}
+                      </p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
+                          video.available 
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-gray-100 text-gray-700'
+                        }`}>
+                          {video.available ? 'Available' : 'Not Available'}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          ${video.price}/month
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
             </div>
-          </Link>
-          
-          <Link to="/manager/settings">
-            <div className="p-6 border rounded-lg hover:border-blue-500 transition-colors">
-              <h2 className="text-xl font-semibold mb-2">Settings</h2>
-              <p className="text-gray-600">Manage your account and preferences</p>
-            </div>
-          </Link>
+          )}
         </div>
       </main>
     </div>

@@ -1,6 +1,4 @@
-# Onboarding Flow Implementation Plan
-
-## Principles for Todo Items
+## Principles for Todo Items 
 - Each item should be a concrete, checkable unit of work
 - Implied work (loading states, responsiveness, etc.) should not be listed
 - Items should be grouped and ordered in implementation sequence
@@ -8,34 +6,35 @@
 - Avoid duplicate work across sections
 - Use existing data/fields to determine state instead of adding flags
 
-## 1. Database Schema Updates
-- [x] Add userType field to User model (enum: "PROPERTY_MANAGER" | "RENTER")
-- [x] Add city field to User model for renters
-- [x] Add companyName and contactInfo fields for property managers
-- [x] Run migrations
+# Edit Listing Implementation
 
-## 2. Auth Flow
-- [x] Keep existing email/password signup at /join and /login
-- [x] Update root route (/) to check user completion:
-  - [x] If !user → /login
-  - [x] If !user.userType → /onboarding
-  - [x] If user.userType === "RENTER" && !user.city → /onboarding
-  - [x] If user.userType === "PROPERTY_MANAGER" && !user.companyName → /onboarding
-  - [x] Otherwise → /listings/feed or /manager based on type
+## 1. Create Edit Route and Form
+-[x] Create `manager.edit.$id.tsx` route
+-[x] Add loader to fetch video data
+-[x] Create form with existing video data pre-filled
+-[x] Add validation for required fields
+-[x] Style form using shadcn components
 
-## 3. Onboarding Flow
-- [x] Create /onboarding route with step handling
-- [x] Step 1: User Type Selection
-  - [x] Two-card choice between PM/Renter
-  - [x] Save to user.userType
-- [x] Step 2: Profile Details (based on userType)
-  - [x] PM: Company name and contact form
-  - [x] Renter: City selection dropdown
-- [x] After completion, redirect to appropriate home:
-  - [x] PMs → /manager
-  - [x] Renters → /listings.feed
+## 2. Server-side Implementation
+-[x] Add updateVideo function to video.server.ts
+-[x] Add action handler for form submission
+-[x] Add error handling for invalid/missing data
+-[x] Add success message and redirect
+
+## 3. Delete Functionality
+-[x] Add delete button with confirmation dialog
+-[x] Add deleteVideo function to video.server.ts
+-[ ] Handle video deletion in Mux (TODO later)
+-[x] Add success message and redirect to dashboard
+
+## 4. UI/UX Improvements
+-[x] Add loading states for form submission
+-[x] Add error messages for validation
+-[ ] Add unsaved changes warning
+-[x] Add preview of current video
 
 ## Notes
-- Use shadcn components
-- Keep forms simple and minimal
-- Store city names in standardized format 
+- Reuse components from create listing form
+- Maintain mobile-first design
+- Keep error messages clear and actionable
+- Consider optimistic UI updates 
