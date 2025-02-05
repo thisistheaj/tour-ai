@@ -45,6 +45,6 @@ As a renter, I want to contact property managers
 
 # tech requirements
 -[x] migrate from sqlite to postgres
--[ ] setup mux premium for longer videos
+-[x] setup mux premium for longer videos
 -[ ] get 20 test videos / listings
 -[x] setup service worker for PWA
