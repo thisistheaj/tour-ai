@@ -59,4 +59,11 @@ Design reqs:
 - [ ] take MVP Video
 - [ ] stitch mvp video
 
+# Tech Debt
+-[ ] migrate /videos routes to new /manager structure
+-[ ] clean up unused routes and components
+-[ ] standardize route naming convention
+-[ ] add proper error boundaries
+-[ ] improve type safety across routes
+
 - [ ]
