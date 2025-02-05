@@ -28,6 +28,16 @@ export async function createUser(email: User["email"], password: string) {
   });
 }
 
+export async function updateUserProfile(
+  userId: User["id"],
+  data: Pick<User, "userType" | "city" | "companyName" | "contactInfo">
+) {
+  return prisma.user.update({
+    where: { id: userId },
+    data,
+  });
+}
+
 export async function deleteUserByEmail(email: User["email"]) {
   return prisma.user.delete({ where: { email } });
 }

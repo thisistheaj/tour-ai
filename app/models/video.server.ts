@@ -19,22 +19,33 @@ export function getVideoListItems({ userId }: { userId: User["id"] }) {
   });
 }
 
-export function createVideo({
-  title,
+export type { Video } from "@prisma/client";
+
+interface CreateVideoInput {
+  title: string;
+  userId: string;
+  muxAssetId: string;
+  muxPlaybackId: string;
+  status: string;
+  price?: number;
+  address?: string;
+  city?: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  description?: string;
+  available?: boolean;
+}
+
+export async function createVideo({
   userId,
-  muxAssetId,
-  muxPlaybackId,
-  status,
-}: Pick<Video, "title" | "muxAssetId" | "muxPlaybackId" | "status"> & {
-  userId: User["id"];
-}) {
+  ...input
+}: CreateVideoInput) {
   return prisma.video.create({
     data: {
-      title,
-      userId,
-      muxAssetId,
-      muxPlaybackId,
-      status,
+      ...input,
+      user: {
+        connect: { id: userId }
+      }
     },
   });
 }
@@ -48,5 +59,99 @@ export function updateVideoMuxInfo({
   return prisma.video.update({
     where: { id },
     data: { muxAssetId, muxPlaybackId, status },
+  });
+}
+
+interface UpdateVideoInput {
+  id: string;
+  userId: string;
+  title: string;
+  price?: number;
+  address?: string;
+  city?: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  description?: string;
+  available?: boolean;
+}
+
+export async function updateVideo({
+  id,
+  userId,
+  ...input
+}: UpdateVideoInput) {
+  return prisma.video.update({
+    where: { 
+      id,
+      userId // Ensure user owns the video
+    },
+    data: input,
+  });
+}
+
+export async function deleteVideo({
+  id,
+  userId,
+}: {
+  id: string;
+  userId: string;
+}) {
+  return prisma.video.delete({
+    where: { 
+      id,
+      userId // Ensure user owns the video
+    },
+  });
+}
+
+export async function getSavedListings(userId: string) {
+  return prisma.savedListing.findMany({
+    where: { userId },
+    include: {
+      video: {
+        include: {
+          user: {
+            select: {
+              email: true,
+              companyName: true,
+              contactInfo: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+export async function isListingSaved(userId: string, videoId: string) {
+  const savedListing = await prisma.savedListing.findUnique({
+    where: {
+      userId_videoId: {
+        userId,
+        videoId,
+      },
+    },
+  });
+  return !!savedListing;
+}
+
+export async function saveListing(userId: string, videoId: string) {
+  return prisma.savedListing.create({
+    data: {
+      user: { connect: { id: userId } },
+      video: { connect: { id: videoId } },
+    },
+  });
+}
+
+export async function unsaveListing(userId: string, videoId: string) {
+  return prisma.savedListing.delete({
+    where: {
+      userId_videoId: {
+        userId,
+        videoId,
+      },
+    },
   });
 } 
