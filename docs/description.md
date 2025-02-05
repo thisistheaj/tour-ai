@@ -1,0 +1,5 @@
+# TourAI: Your AI Apartment Tour Guide
+
+TourAI transforms apartment hunting by combining immersive video walkthroughs with an AI-powered tour guide in your pocket. Through a TikTok-style interface, renters can scroll through apartment video tours while naturally conversing with an AI assistant that knows every detail about each property. No more scheduling multiple in-person tours or reading through lengthy listings - simply watch, ask questions, and let your AI guide help you discover your next home.
+
+The platform keeps things elegantly simple: property managers upload video tours and provide detailed property information, while renters browse through an engaging vertical feed of apartments in their city, with an AI assistant ready to answer any question about the space they're viewing. Whether you want to know the exact dimensions of the master bedroom or see similar units with bay windows, TourAI's intelligent assistant helps you explore properties as if you were there with a knowledgeable realtor. Double-tap to save favorites, and your AI guide will remember your preferences to help find similar properties you'll love.

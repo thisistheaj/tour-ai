@@ -1,0 +1,46 @@
+erDiagram
+    User ||--o{ Video : uploads
+    User ||--o{ SavedVideo : saves
+    Video ||--o{ SavedVideo : saved_in
+    User ||--|| Password : has
+
+    User {
+        string id PK
+        string email
+        string city
+        string role
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    Password {
+        string hash
+        string userId FK
+    }
+
+    Video {
+        string id PK
+        string title
+        string description
+        decimal price
+        integer bedrooms
+        decimal bathrooms
+        string address
+        string city
+        string state
+        string zipCode
+        boolean available
+        string muxAssetId
+        string muxPlaybackId
+        string status
+        string userId FK
+        datetime createdAt
+        datetime updatedAt
+    }
+
+    SavedVideo {
+        string id PK
+        string userId FK
+        string videoId FK
+        datetime createdAt
+    }
