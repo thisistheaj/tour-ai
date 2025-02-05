@@ -7,9 +7,18 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum UserType {
+  PROPERTY_MANAGER
+  RENTER
+}
+
 model User {
-  id    String @id @default(cuid())
-  email String @unique
+  id          String    @id @default(cuid())
+  email       String    @unique
+  userType    UserType?
+  city        String?
+  companyName String?
+  contactInfo String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

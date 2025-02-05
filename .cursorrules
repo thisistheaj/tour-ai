@@ -71,3 +71,5 @@ Prefer minimal solutions. Minimal changes to the db, minimum number of files tou
 - Ensure Mux webhook route is properly handling callbacks
 - When evaluating solutions, always ask "What would this look like if it was easy?"
 - if i forget to go through any of the steps above before committing, please remind me at least once at the end
+
+we never commit before we've tested and agreed that changes are working 
