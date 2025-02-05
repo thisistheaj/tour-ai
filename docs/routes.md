@@ -1,8 +1,6 @@
 # Remix Routes Documentation
 
-## Existing Routes
-
-### Auth & System
+## Auth & System
 - `routes/_index.tsx` - Landing page
 - `routes/healthcheck.tsx` - Server health check endpoint
 - `routes/join.tsx` - Sign up page
@@ -10,21 +8,18 @@
 - `routes/logout.tsx` - Logout handler
 - `routes/onboarding.tsx` - User type & profile setup
 
-### Video Processing
-- `routes/videos.upload.tsx` - Video upload page
-- `routes/videos.create-upload.tsx` - Mux upload endpoint wrapper
-- `routes/mux.webhook.tsx` - Webhook handler for Mux video processing
-
-## Needed Routes
-
-### Property Manager UI
-- `routes/manager._index.tsx` - PM dashboard overview
-- `routes/manager.listings.tsx` - List of PM's properties
-- `routes/manager.new.tsx` - Create new listing form
+## Property Manager UI
+- `routes/manager._index.tsx` - PM dashboard with navigation
+- `routes/manager.listings.tsx` - List of PM's properties (migrated from videos._index.tsx)
+- `routes/manager.new.tsx` - Create new listing form (migrated from videos.upload.tsx)
 - `routes/manager.edit.$id.tsx` - Edit existing listing
 - `routes/manager.settings.tsx` - Account settings
 
-### Renter UI
+## Video Processing
+- `routes/videos.create-upload.tsx` - Mux upload endpoint wrapper
+- `routes/mux.webhook.tsx` - Webhook handler for Mux video processing
+
+## Renter UI
 - `routes/listings.feed.tsx` - TikTok-style video feed
 - `routes/listings.saved.tsx` - Saved listings page
 - `routes/listings.$id.tsx` - Individual listing view
@@ -39,7 +34,7 @@
 - `/onboarding` - User type selection and profile completion
 
 ### Property Manager Routes
-- `/manager` - Dashboard home
+- `/manager` - Dashboard with navigation
 - `/manager/listings` - List all properties
 - `/manager/new` - Create new listing
 - `/manager/edit/:id` - Edit specific listing
@@ -51,10 +46,9 @@
 - `/listings/:id` - Detailed listing view
 - `/listings/settings` - User preferences
 
-### Video Processing
-- `/videos/upload` - Video upload interface
-- `/videos/create-upload` - Mux endpoint
-- `/mux.webhook` - Mux status updates
+## Migration Notes
+- `videos._index.tsx` → `manager.listings.tsx`
+- `videos.upload.tsx` → `manager.new.tsx`
 
 ## Notes
 - All routes should implement proper authentication checks

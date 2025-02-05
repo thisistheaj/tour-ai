@@ -1,13 +1,38 @@
-import type { MetaFunction } from "@remix-run/node";
+import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import { Link } from "@remix-run/react";
 import { redirect } from "@remix-run/node";
+import type { UserType } from "@prisma/client";
+import { getUser } from "~/session.server";
 
 import { useOptionalUser } from "~/utils";
 
-export const meta: MetaFunction = () => [{ title: "Remix Notes" }];
+export const meta: MetaFunction = () => [{ title: "TourAI" }];
 
-export const loader = async () => {
-  return redirect("/videos");
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const user = await getUser(request);
+
+  // Not logged in -> login
+  if (!user) {
+    return redirect("/login");
+  }
+
+  // No user type -> onboarding
+  if (!user.userType) {
+    return redirect("/onboarding");
+  }
+
+  // Renter without city -> onboarding
+  if (user.userType === "RENTER" && !user.city) {
+    return redirect("/onboarding");
+  }
+
+  // PM without company info -> onboarding
+  if (user.userType === "PROPERTY_MANAGER" && !user.companyName) {
+    return redirect("/onboarding");
+  }
+
+  // Redirect to appropriate home based on user type
+  return redirect(user.userType === "PROPERTY_MANAGER" ? "/manager" : "/listings/feed");
 };
 
 export default function Index() {

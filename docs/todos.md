@@ -9,19 +9,19 @@
 - Use existing data/fields to determine state instead of adding flags
 
 ## 1. Database Schema Updates
-- [ ] Add userType field to User model (enum: "PROPERTY_MANAGER" | "RENTER")
-- [ ] Add city field to User model for renters
-- [ ] Add companyName and contactInfo fields for property managers
-- [ ] Run migrations
+- [x] Add userType field to User model (enum: "PROPERTY_MANAGER" | "RENTER")
+- [x] Add city field to User model for renters
+- [x] Add companyName and contactInfo fields for property managers
+- [x] Run migrations
 
 ## 2. Auth Flow
-- [ ] Keep existing email/password signup at /join and /login
-- [ ] Update root route (/) to check user completion:
-  - [ ] If !user → /login
-  - [ ] If !user.userType → /onboarding
-  - [ ] If user.userType === "RENTER" && !user.city → /onboarding
-  - [ ] If user.userType === "PROPERTY_MANAGER" && !user.companyName → /onboarding
-  - [ ] Otherwise → /listings/feed or /manager based on type
+- [x] Keep existing email/password signup at /join and /login
+- [x] Update root route (/) to check user completion:
+  - [x] If !user → /login
+  - [x] If !user.userType → /onboarding
+  - [x] If user.userType === "RENTER" && !user.city → /onboarding
+  - [x] If user.userType === "PROPERTY_MANAGER" && !user.companyName → /onboarding
+  - [x] Otherwise → /listings/feed or /manager based on type
 
 ## 3. Onboarding Flow
 - [ ] Create /onboarding route with step handling

@@ -55,7 +55,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
 
   return createUserSession({
-    redirectTo: typeof redirectTo === "string" ? redirectTo : "/videos",
+    redirectTo: typeof redirectTo === "string" ? redirectTo : "/",
     remember: remember === "on" ? true : false,
     request,
     userId: user.id,
@@ -66,7 +66,7 @@ export const meta: MetaFunction = () => [{ title: "Login" }];
 
 export default function LoginPage() {
   const [searchParams] = useSearchParams();
-  const redirectTo = searchParams.get("redirectTo") || "/notes";
+  const redirectTo = searchParams.get("redirectTo") || "/";
   const actionData = useActionData<typeof action>();
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
