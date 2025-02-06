@@ -31,7 +31,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { CheckCircle2, Maximize2, Heart, MessageCircle, Share2 } from "lucide-react";
+import { CheckCircle2, Maximize2, Heart, MessageCircle, Share2, CircleDollarSign, MapPin, Bed, Bath, ChevronUp, Mail } from "lucide-react";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const userId = await requireUserId(request);
@@ -350,57 +350,88 @@ export default function NewListing() {
             ) : (
               // Step 3: Preview
               <div className="space-y-6">
-                {/* Video Preview with TikTok-style UI */}
-                <div className="relative aspect-[9/16] bg-black rounded-lg overflow-hidden">
-                  <mux-player
-                    className="w-full h-full object-contain"
-                    playback-id={videoData?.playbackId}
-                    metadata-video-title={videoData?.title}
-                    stream-type="on-demand"
-                    autoplay="muted"
-                    loop={true}
-                    defaultHidden={true}
-                    playsinline={true}
-                  />
+                {/* Video Preview */}
+                <div className="relative aspect-[9/16] bg-black rounded-lg overflow-hidden mx-auto max-w-sm">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <mux-player
+                      className="w-full h-full object-contain"
+                      playback-id={videoData?.playbackId}
+                      metadata-video-title={videoData?.title}
+                      stream-type="on-demand"
+                      autoplay="muted"
+                      loop={true}
+                      defaultHidden={true}
+                      playsinline={true}
+                    />
+                  </div>
                   
-                  {/* Video Info Overlay */}
-                  <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
-                    <div className="text-white">
-                      <h2 className="text-lg font-bold">${formData?.price}/month</h2>
-                      <p className="text-sm opacity-80">
-                        {formData?.bedrooms} beds • {formData?.bathrooms} baths • {formData?.address}
-                      </p>
-                      <p className="text-sm mt-2 line-clamp-2">
-                        {formData?.description}
-                      </p>
+                  {/* Property Info Overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/50 to-transparent">
+                    <div className="p-6 space-y-3">
+                      {/* Price and Availability */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-white">
+                          <CircleDollarSign className="w-5 h-5" />
+                          <span className="text-2xl font-bold">${formData?.price || '0'}/mo</span>
+                        </div>
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-sm bg-green-500/20 text-green-300">
+                          <CheckCircle2 className="w-4 h-4" /> Available
+                        </span>
+                      </div>
+
+                      {/* Title and Location */}
+                      <div>
+                        <h2 className="text-xl font-semibold text-white">{videoData?.title || 'Property Title'}</h2>
+                        <div className="flex items-center gap-1 text-white/80 mt-1">
+                          <MapPin className="w-4 h-4" />
+                          <span>{formData?.address || 'Property Address'}</span>
+                        </div>
+                      </div>
+
+                      {/* Property Details */}
+                      <div className="flex items-center gap-4 text-white/90">
+                        <div className="flex items-center gap-1">
+                          <Bed className="w-4 h-4" />
+                          <span>{formData?.bedrooms || '0'} beds</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Bath className="w-4 h-4" />
+                          <span>{formData?.bathrooms || '0'} baths</span>
+                        </div>
+                      </div>
+
+                      {/* Description Preview */}
+                      <div className="text-white/80">
+                        <p className="line-clamp-2">{formData?.description || 'Property description will appear here'}</p>
+                        <div className="text-sm text-white/60 mt-1 flex items-center gap-1">
+                          Preview Only <ChevronUp className="w-4 h-4" />
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Side Actions */}
-                  <div className="absolute right-4 bottom-20 flex flex-col gap-6">
-                    <button type="button" className="group flex flex-col items-center gap-1">
-                      <div className="p-3 rounded-full bg-white/10 text-white 
-                        group-hover:bg-white/20 transition-colors">
+                  {/* Side Actions Preview */}
+                  <div className="absolute right-4 bottom-32 flex flex-col gap-6">
+                    <div className="group flex flex-col items-center gap-1">
+                      <div className="p-3 rounded-full bg-white/10 text-white">
                         <Heart className="w-6 h-6" />
                       </div>
-                      <span className="text-white text-xs">Like</span>
-                    </button>
+                      <span className="text-white text-xs">Save</span>
+                    </div>
 
-                    <button type="button" className="group flex flex-col items-center gap-1">
-                      <div className="p-3 rounded-full bg-white/10 text-white 
-                        group-hover:bg-white/20 transition-colors">
-                        <MessageCircle className="w-6 h-6" />
+                    <div className="group flex flex-col items-center gap-1">
+                      <div className="p-3 rounded-full bg-white/10 text-white">
+                        <Mail className="w-6 h-6" />
                       </div>
-                      <span className="text-white text-xs">Comment</span>
-                    </button>
+                      <span className="text-white text-xs">Contact</span>
+                    </div>
 
-                    <button type="button" className="group flex flex-col items-center gap-1">
-                      <div className="p-3 rounded-full bg-white/10 text-white 
-                        group-hover:bg-white/20 transition-colors">
+                    <div className="group flex flex-col items-center gap-1">
+                      <div className="p-3 rounded-full bg-white/10 text-white">
                         <Share2 className="w-6 h-6" />
                       </div>
                       <span className="text-white text-xs">Share</span>
-                    </button>
+                    </div>
                   </div>
                 </div>
 
