@@ -65,3 +65,12 @@ Design reqs:
 -[x] standardize route naming convention
 -[ ] add proper error boundaries
 -[x] improve type safety across routes
+
+## Enhancements
+-[x] add functionality to settings link
+-[x] add settings page for PMs — with change metro, update company
+-[x] add settings page for renters — with change metro
+-[x] restrict renter accounts from PM views
+-[x] fix back button in feed
+-[ ] fix swiping + details view together (gesture conflict)
+

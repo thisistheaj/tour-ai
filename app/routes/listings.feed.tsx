@@ -5,7 +5,7 @@ import "@mux/mux-player";
 import MuxPlayerElement from "@mux/mux-player";
 import { useState } from "react";
 import { prisma } from "~/db.server";
-import { requireUserId } from "~/session.server";
+import { requireUser } from "~/session.server";
 import { isListingSaved, saveListing, unsaveListing } from "~/models/video.server";
 import type { Video } from "@prisma/client";
 import {
@@ -14,6 +14,7 @@ import {
   Phone,
   ChevronUp,
   ChevronDown,
+  Settings,
   ArrowLeft,
   MapPin,
   Bed,
@@ -27,7 +28,7 @@ import {
 import { Link } from "@remix-run/react";
 
 export const loader = async ({ request }: { request: Request }) => {
-  const userId = await requireUserId(request);
+  const user = await requireUser(request);
   const videos = await prisma.video.findMany({
     where: {
       status: "ready",
@@ -49,14 +50,14 @@ export const loader = async ({ request }: { request: Request }) => {
 
   // Get saved state for each video
   const savedStates = await Promise.all(
-    videos.map((video: Video) => isListingSaved(userId, video.id))
+    videos.map((video: Video) => isListingSaved(user.id, video.id))
   );
 
-  return json({ videos, savedStates, userId });
+  return json({ videos, savedStates, userId: user.id, userType: user.userType });
 };
 
 export async function action({ request }: ActionFunctionArgs) {
-  const userId = await requireUserId(request);
+  const user = await requireUser(request);
   const formData = await request.formData();
   const videoId = formData.get("videoId");
   const action = formData.get("action");
@@ -66,10 +67,10 @@ export async function action({ request }: ActionFunctionArgs) {
   }
 
   if (action === "save") {
-    await saveListing(userId, videoId);
+    await saveListing(user.id, videoId);
     return json({ saved: true });
   } else if (action === "unsave") {
-    await unsaveListing(userId, videoId);
+    await unsaveListing(user.id, videoId);
     return json({ saved: false });
   }
 
@@ -77,7 +78,7 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function FeedPage() {
-  const { videos, savedStates, userId } = useLoaderData<typeof loader>();
+  const { videos, savedStates, userId, userType } = useLoaderData<typeof loader>();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const fetcher = useFetcher();
@@ -102,11 +103,25 @@ export default function FeedPage() {
 
   return (
     <div className="fixed inset-0 bg-black">
-      {/* Back Button and Navigation */}
+      {/* Navigation Bar */}
       <div className="absolute top-4 left-4 right-4 z-50 flex justify-between items-center">
-        <Link to="/manager" className="text-white">
-          <ArrowLeft className="w-6 h-6" />
-        </Link>
+        {userType === "PROPERTY_MANAGER" ? (
+          <Link 
+            to="/manager" 
+            className="text-white flex items-center gap-2 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="text-sm">Back</span>
+          </Link>
+        ) : (
+          <Link 
+            to="/listings/settings" 
+            className="text-white flex items-center gap-2 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full transition-colors"
+          >
+            <Settings className="w-4 h-4" />
+            <span className="text-sm">Settings</span>
+          </Link>
+        )}
         <Link 
           to="/listings/saved" 
           className="text-white flex items-center gap-2 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full transition-colors"
