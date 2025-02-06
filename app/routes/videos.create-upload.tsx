@@ -15,7 +15,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       playback_policy: ["public"],
       encoding_tier: "baseline",
     },
-    cors_origin: "*", // In production, set this to your domain
+    cors_origin: "*",
   });
 
   return json({ url: upload.url, id: upload.id });

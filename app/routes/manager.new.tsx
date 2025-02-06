@@ -3,9 +3,9 @@ import { json, redirect } from "@remix-run/node";
 import { Form, useActionData, useNavigation } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import "@mux/mux-uploader";
-import type { MuxUploaderElement } from "@mux/mux-uploader";
+import MuxUploaderElement from "@mux/mux-uploader";
 import "@mux/mux-player";
-import type { MuxPlayerElement } from "@mux/mux-player";
+import MuxPlayerElement from "@mux/mux-player";
 import { requireUserId } from "~/session.server";
 import { createVideo } from "~/models/video.server";
 import mux from "~/lib/mux.server";
@@ -163,12 +163,12 @@ export default function NewListing() {
 
   // Handle successful video upload
   useEffect(() => {
-    if (actionData?.success && actionData.assetId) {
+    if ((actionData as any)?.success && (actionData as any).assetId) {
       setVideoData({
-        assetId: actionData.assetId,
-        playbackId: actionData.playbackId,
-        status: actionData.status,
-        title: actionData.title
+        assetId: (actionData as any).assetId,
+        playbackId: (actionData as any).playbackId,
+        status: (actionData as any).status,
+        title: (actionData as any).title
       });
       setStep(2);
     }
@@ -218,8 +218,8 @@ export default function NewListing() {
     <div className="container mx-auto p-4 pb-24">
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
-          <CardTitle>{stepTitles[step].title}</CardTitle>
-          <CardDescription>{stepTitles[step].description}</CardDescription>
+          <CardTitle>{stepTitles[step as keyof typeof stepTitles].title}</CardTitle>
+          <CardDescription>{stepTitles[step as keyof typeof stepTitles].description}</CardDescription>
         </CardHeader>
 
         <CardContent>
@@ -242,9 +242,9 @@ export default function NewListing() {
                 name="title"
                     placeholder="e.g., Luxury Downtown Loft, Modern South Austin Home..."
               />
-              {actionData?.errors?.title && (
+              {(actionData as any)?.errors?.title && (
                 <Alert variant="destructive">
-                  <AlertDescription>{actionData.errors.title}</AlertDescription>
+                  <AlertDescription>{(actionData as any).errors.title}</AlertDescription>
                 </Alert>
               )}
             </div>

@@ -27,7 +27,7 @@ import {
 import { ArrowLeft, Trash2, CircleDollarSign, MapPin, Bed, Bath, ChevronUp, Mail, Heart, Share2, CheckCircle2, XCircle } from "lucide-react";
 import { Link } from "@remix-run/react";
 import "@mux/mux-player";
-import type { MuxPlayerElement } from "@mux/mux-player";
+import MuxPlayerElement from "@mux/mux-player";
 import { useState } from "react";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -138,9 +138,9 @@ export default function EditListing() {
 
         <CardContent>
           <Form method="post" className="space-y-6">
-            {actionData?.errors?.form && (
+            {(actionData?.errors as any)?.form && (
               <Alert variant="destructive">
-                <AlertDescription>{actionData.errors.form}</AlertDescription>
+                <AlertDescription>{(actionData?.errors as any).form}</AlertDescription>
               </Alert>
             )}
 

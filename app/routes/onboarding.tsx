@@ -50,7 +50,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   // Handle step 1 - user type selection
   if (userType === "PROPERTY_MANAGER" || userType === "RENTER") {
-    await updateUserProfile(user.id, { userType });
+    await updateUserProfile(user.id, { userType } as any);
     return redirect("/onboarding");
   }
 
@@ -59,14 +59,14 @@ export async function action({ request }: ActionFunctionArgs) {
     await updateUserProfile(user.id, {
       companyName: companyName.toString(),
       contactInfo: contactInfo.toString(),
-    });
+    } as any);
     return redirect("/manager");
   }
 
   if (user.userType === "RENTER" && city) {
     await updateUserProfile(user.id, {
       city: city.toString(),
-    });
+    } as any);
     return redirect("/listings.feed");
   }
 

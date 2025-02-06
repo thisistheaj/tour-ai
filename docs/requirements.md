@@ -63,7 +63,6 @@ As a renter, I want to contact property managers
 -[x] clean up unused routes and components
 -[x] standardize route naming convention
 -[x] improve type safety across routes
--[ ] video scrolling (w/ window and preloading)
 -[ ] mux deletions
 
 ## Enhancements
@@ -81,22 +80,24 @@ As a renter, I want to contact property managers
 -[ ] screen size ratio
 -[ ] make drawer translucent
 -Features:
--[ ] places API + map view
 -[ ] double tap to save
+-[ ] places API + map view
 
 ## Bugs
 -[x] UI visible behind status bar
 -[x] fix padding on upload and preview feed buttons
 -[x] remove previous and next text in feed
--[ ] consistent previews in confirm and edit views
+-[x] consistent previews in confirm and edit views
 -[ ] video volume — why does only one video have sound on? why isnt it the first
+-[ ] video scrolling (w/ window and preloading)
 -[ ] gesture conflict: wiping + detail view fire simultaneously {desktop only}
 
 ## code q
--[ ] remove unused imports
--[ ] fix linter errors
--[ ] cleanup logs
--[ ] audit code
+-[x] remove unused imports
+-[x] fix linter errors
+-[x] cleanup logs
+-[x] audit code
+-[ ] fix unknown mux props
 
 ## Arch?
 -[ ] make API for test data
@@ -117,8 +118,8 @@ As a renter, I want to contact property managers
 -[ ] add test account + login
 
 ### QA 
--[ ] bug search
--[ ] find enhancements
+-[x] bug search
+-[x] find enhancements
 -[ ] vet user stories 
 
 

@@ -1,20 +1,18 @@
-import { json, redirect, type LoaderFunctionArgs } from "@remix-run/node";
+import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { Link, useLoaderData } from "@remix-run/react";
 import { requireUser } from "~/session.server";
 import { getVideoListItems } from "~/models/video.server";
 import { Button } from "~/components/ui/button";
 import { PlusCircle, Home, Settings, LogOut, Play } from "lucide-react";
-import type { Video } from "~/models/video.server";
-import { prisma } from "~/db.server";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireUser(request);
-  const videos = await getVideoListItems({ userId: user.id });
+  const videos: any[] = await getVideoListItems({ userId: user.id });
   return json({ user, videos });
 }
 
 export default function ManagerDashboard() {
-  const { user, videos } = useLoaderData<typeof loader>();
+  const { videos } = useLoaderData<typeof loader>();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -95,7 +93,7 @@ export default function ManagerDashboard() {
             <h2 className="text-lg font-semibold">Your Property Tours</h2>
             {videos.length > 0 && (
               <span className="text-sm text-gray-500">
-                {videos.filter((video: Video) => video.available).length} available
+                {videos.filter((video: any) => video.available).length} available
               </span>
             )}
           </div>
@@ -115,7 +113,7 @@ export default function ManagerDashboard() {
             </div>
           ) : (
             <div className="grid gap-4">
-              {videos.map((video: Video) => (
+              {videos.map((video: any) => (
                 <Link
                   key={video.id}
                   to={`/manager/edit/${video.id}`}
