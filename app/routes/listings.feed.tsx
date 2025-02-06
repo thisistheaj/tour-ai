@@ -83,11 +83,15 @@ export default function FeedPage() {
   const [showFullDescription, setShowFullDescription] = useState(false);
   const fetcher = useFetcher();
 
-  const handleSwipe = (direction: number) => {
-    if (direction > 0 && currentIndex > 0) {
+  const handleSwipe = (direction: string) => {
+    if (direction === 'up' && currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
-    } else if (direction < 0 && currentIndex < videos.length - 1) {
+    } else if (direction === 'down' && currentIndex < videos.length - 1) {
       setCurrentIndex(currentIndex + 1);
+    } else if (direction === 'up' && currentIndex === 0) {
+      setCurrentIndex(videos.length - 1);
+    } else if (direction === 'down' && currentIndex === videos.length - 1) {
+      setCurrentIndex(0);
     }
   };
 
@@ -148,22 +152,33 @@ export default function FeedPage() {
             onDragEnd={(e, { offset, velocity }) => {
               const swipe = Math.abs(offset.y) * velocity.y;
               if (Math.abs(swipe) > 50000) {
-                handleSwipe(swipe);
+                const direction = swipe > 0 ? 'up' : 'down';
+                handleSwipe(direction);
               }
             }}
           >
             <div className="relative w-full h-full flex items-center justify-center">
-              <mux-player
-                className="w-full h-full max-h-screen object-contain"
-                playback-id={video.muxPlaybackId}
-                metadata-video-title={video.title}
-                stream-type="on-demand"
-                autoplay={index === currentIndex ? "muted" : "false"}
-                loop={true}
-                defaultHidden={true}
-                playsinline={true}
-              />
-              
+              {index === currentIndex ? 
+                <mux-player
+                  className="w-full h-full max-h-screen object-contain"
+                  playback-id={video.muxPlaybackId}
+                  metadata-video-title={video.title}
+                  stream-type="on-demand"
+                  autoplay="muted"
+                  loop={true}
+                  defaultHidden={true}
+                  playsinline={true}
+                /> : 
+                <mux-player
+                  className="w-full h-full max-h-screen object-contain"
+                  playback-id={video.muxPlaybackId}
+                  metadata-video-title={video.title}
+                  stream-type="on-demand"
+                  loop={true}
+                  defaultHidden={true}
+                  playsinline={true}
+                />
+              }
               {/* Property Info Overlay */}
               <div 
                 className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/50 to-transparent"
@@ -413,11 +428,3 @@ export default function FeedPage() {
     </div>
   );
 }
-
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      'mux-player': React.DetailedHTMLProps<React.HTMLAttributes<MuxPlayerElement>, MuxPlayerElement>;
-    }
-  }
-} 

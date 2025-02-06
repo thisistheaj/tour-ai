@@ -2,7 +2,6 @@ import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { prisma } from "~/db.server";
 import "@mux/mux-player";
-import type { MuxPlayerElement } from "@mux/mux-player";
 import {
   MapPin,
   Bed,
@@ -171,7 +170,7 @@ export default function ListingPage() {
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      'mux-player': React.DetailedHTMLProps<React.HTMLAttributes<MuxPlayerElement>, MuxPlayerElement>;
+      'mux-player': any;
     }
   }
 } 

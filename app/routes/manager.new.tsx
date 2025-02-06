@@ -535,8 +535,7 @@ export default function NewListing() {
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      'mux-uploader': React.DetailedHTMLProps<React.HTMLAttributes<MuxUploaderElement>, MuxUploaderElement>;
-      'mux-player': React.DetailedHTMLProps<React.HTMLAttributes<MuxPlayerElement>, MuxPlayerElement>;
+      'mux-uploader': any;
     }
   }
 } 

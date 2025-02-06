@@ -396,12 +396,3 @@ export default function EditListing() {
     </div>
   );
 }
-
-// Add TypeScript support for the web component
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      'mux-player': React.DetailedHTMLProps<React.HTMLAttributes<MuxPlayerElement>, MuxPlayerElement>;
-    }
-  }
-} 

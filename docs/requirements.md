@@ -64,6 +64,7 @@ As a renter, I want to contact property managers
 -[x] standardize route naming convention
 -[x] improve type safety across routes
 -[ ] mux deletions
+-[ ] gesture conflict: wiping + detail view fire simultaneously {desktop only}
 
 ## Enhancements
 -[x] add functionality to settings link
@@ -88,22 +89,22 @@ As a renter, I want to contact property managers
 -[x] fix padding on upload and preview feed buttons
 -[x] remove previous and next text in feed
 -[x] consistent previews in confirm and edit views
--[ ] video volume — why does only one video have sound on? why isnt it the first
--[ ] video scrolling (w/ window and preloading)
--[ ] gesture conflict: wiping + detail view fire simultaneously {desktop only}
+-[x] video volume — why does only one video have sound on? why isnt it the first
+-[x] video scrolling (w/ window and preloading)
+-[ ] fix '/apple-touch-icon.png' 404 error
 
 ## code q
 -[x] remove unused imports
 -[x] fix linter errors
 -[x] cleanup logs
 -[x] audit code
--[ ] fix unknown mux props
+-[x] fix unknown mux props
 
 ## Arch?
 -[ ] make API for test data
 -[ ] setup PG Vector
 -[ ] put in capacitor
--[ ] test video annottations
+-[ ] test video annotations
 
 ## Logistics
 
