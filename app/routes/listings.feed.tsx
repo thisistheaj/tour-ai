@@ -410,22 +410,6 @@ export default function FeedPage() {
           </motion.div>
         ))}
       </AnimatePresence>
-
-      {/* Navigation Hints */}
-      <div className="absolute inset-x-0 top-1/2 flex justify-between px-4 pointer-events-none text-white/50">
-        {currentIndex > 0 && (
-          <div className="flex items-center gap-2">
-            <ChevronUp className="w-6 h-6" />
-            <span>Previous</span>
-          </div>
-        )}
-        {currentIndex < videos.length - 1 && (
-          <div className="flex items-center gap-2 ml-auto">
-            <span>Next</span>
-            <ChevronDown className="w-6 h-6" />
-          </div>
-        )}
-      </div>
     </div>
   );
 }

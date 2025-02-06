@@ -19,22 +19,22 @@ export default function ManagerDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Fixed Header */}
-      <header className="fixed top-0 left-0 right-0 bg-white border-b z-10">
+      <header className="fixed top-0 left-0 right-0 bg-black border-b border-white/10 z-10">
         <div className="container mx-auto px-4">
           <div className="h-16 flex items-center justify-between">
-            <div className="font-semibold">TourAI</div>
+            <div className="font-semibold text-white">TourAI</div>
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" asChild>
+              <Button variant="ghost" size="sm" className="text-white hover:bg-white/10" asChild>
                 <Link to="/listings/feed">
                   <Play className="w-5 h-5" />
                 </Link>
               </Button>
-              <Button variant="ghost" size="sm" asChild>
+              <Button variant="ghost" size="sm" className="text-white hover:bg-white/10" asChild>
                 <Link to="/manager/settings">
                   <Settings className="w-5 h-5" />
                 </Link>
               </Button>
-              <Button variant="ghost" size="sm" asChild>
+              <Button variant="ghost" size="sm" className="text-white hover:bg-white/10" asChild>
                 <Link to="/logout">
                   <LogOut className="w-5 h-5" />
                 </Link>
@@ -58,10 +58,10 @@ export default function ManagerDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid gap-4 mb-8">
+        <div className="grid gap-4 mb-8 px">
           <Button 
             size="lg" 
-            className="w-full flex items-center justify-center gap-2 h-auto py-6"
+            className="w-full flex items-center justify-start gap-2 h-auto py-6 px-4"
             asChild
           >
             <Link to="/manager/new">
@@ -76,7 +76,7 @@ export default function ManagerDashboard() {
           <Button 
             variant="outline"
             size="lg"
-            className="w-full flex items-center justify-center gap-2 h-auto py-6"
+            className="w-full flex items-center justify-start gap-2 h-auto py-6 px-4"
             asChild
           >
             <Link to="/listings/feed">

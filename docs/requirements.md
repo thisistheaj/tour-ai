@@ -1,4 +1,4 @@
-# Week 1 User Stories
+# User Stories
 
 ## Story 1: Create Listing
 As a property manager, I want to create a new listing
@@ -43,28 +43,28 @@ As a renter, I want to contact property managers
 -[x] Can view contact information for each listing
 -[x] Can tap to initiate contact (email/phone) directly from the app
 
-# tech requirements
+## Story 7: Share Listings
+As a renter, I want to share listings with friends
+-[x] Can share a listing via text, email, or social media
+-[x] Can copy a listing link to share
+-[x] Can share a listing via social media
+
+## Story 8: Contact Property Managers
+As a renter, I want to contact property managers
+-[x] Can view contact information for each listing
+-[x] Can tap to initiate contact (email/phone) directly from the app
+
+# Backlog
+
+## Tech Debt
 -[x] migrate from sqlite to postgres
 -[x] setup mux premium for longer videos
--[ ] get 20 test videos / listings
--[x] setup service worker for PWA
-
-Design reqs:
--[x] bootstrap high convverting landing page with description.md
--[ ] add a video to the landing page
--[ ] make app ready for portfolio demo
-
-## Todos (scrap):
-- [ ] basic dummy data? 
-- [ ] take MVP Video
-- [ ] stitch mvp video
-
-# Tech Debt
 -[x] migrate /videos routes to new /manager structure
 -[x] clean up unused routes and components
 -[x] standardize route naming convention
--[ ] add proper error boundaries
 -[x] improve type safety across routes
+-[ ] video scrolling (w/ window and preloading)
+-[ ] mux deletions
 
 ## Enhancements
 -[x] add functionality to settings link
@@ -72,5 +72,56 @@ Design reqs:
 -[x] add settings page for renters — with change metro
 -[x] restrict renter accounts from PM views
 -[x] fix back button in feed
--[ ] fix swiping + details view together (gesture conflict)
+-[x] setup service worker for PWA
+-[x] home screen icon
+-styles:
+-[ ] replace blue color
+-[ ] style login and signup
+-[ ] change fonts?
+-[ ] screen size ratio
+-[ ] make drawer translucent
+-Features:
+-[ ] places API + map view
+-[ ] double tap to save
+
+## Bugs
+-[x] UI visible behind status bar
+-[x] fix padding on upload and preview feed buttons
+-[x] remove previous and next text in feed
+-[ ] consistent previews in confirm and edit views
+-[ ] video volume — why does only one video have sound on? why isnt it the first
+-[ ] gesture conflict: wiping + detail view fire simultaneously {desktop only}
+
+## code q
+-[ ] remove unused imports
+-[ ] fix linter errors
+-[ ] cleanup logs
+-[ ] audit code
+
+## Arch?
+-[ ] make API for test data
+-[ ] setup PG Vector
+-[ ] put in capacitor
+-[ ] test video annottations
+
+## Logistics
+
+### Demo Videos
+-[x] make MVP Video with "Responsive Design Mode"
+-[ ] get 20 test videos / listings
+-[ ] voice over on phone video
+
+##Portfolio readiness
+-[x] bootstrap high convverting landing page with description.md
+-[ ] add a video to the landing page
+-[ ] add test account + login
+
+### QA 
+-[ ] bug search
+-[ ] find enhancements
+-[ ] vet user stories 
+
+
+
+
 
