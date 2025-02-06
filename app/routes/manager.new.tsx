@@ -88,7 +88,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     const bedrooms = formData.get("bedrooms");
     const bathrooms = formData.get("bathrooms");
     const description = formData.get("description");
-    const available = formData.get("available") === "true";
+    const available = formData.get("available") === "on";
     const assetId = formData.get("assetId");
     const playbackId = formData.get("playbackId");
 
@@ -115,7 +115,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         available,
       });
 
-      return redirect("/manager/listings");
+      return redirect("/manager");
     } catch (error) {
       console.error("Error creating listing:", error);
       return json(
