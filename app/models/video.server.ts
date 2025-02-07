@@ -137,21 +137,42 @@ export async function isListingSaved(userId: string, videoId: string) {
 }
 
 export async function saveListing(userId: string, videoId: string) {
-  return prisma.savedListing.create({
-    data: {
-      user: { connect: { id: userId } },
-      video: { connect: { id: videoId } },
-    },
-  });
-}
-
-export async function unsaveListing(userId: string, videoId: string) {
-  return prisma.savedListing.delete({
-    where: {
-      userId_videoId: {
+  try {
+    return await prisma.savedListing.create({
+      data: {
         userId,
         videoId,
       },
-    },
-  });
+    });
+  } catch (error: any) {
+    // If already saved, just return the existing record
+    if (error.code === 'P2002') {
+      return await prisma.savedListing.findFirst({
+        where: {
+          userId,
+          videoId,
+        },
+      });
+    }
+    throw error;
+  }
+}
+
+export async function unsaveListing(userId: string, videoId: string) {
+  try {
+    return await prisma.savedListing.delete({
+      where: {
+        userId_videoId: {
+          userId,
+          videoId,
+        },
+      },
+    });
+  } catch (error: any) {
+    // If not found, just return null
+    if (error.code === 'P2025') {
+      return null;
+    }
+    throw error;
+  }
 } 

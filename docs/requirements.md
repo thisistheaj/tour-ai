@@ -80,7 +80,7 @@ As a renter, I want to contact property managers
 -[x] make drawer translucent
 -[ ] screen size ratio
 -Features:
--[ ] double tap to save
+-[x] double tap to save
 -[ ] places API + map view
 
 ## Bugs

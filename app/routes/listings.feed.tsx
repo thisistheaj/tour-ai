@@ -81,7 +81,20 @@ export default function FeedPage() {
   const { videos, savedStates, userId, userType } = useLoaderData<typeof loader>();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const [lastTap, setLastTap] = useState({ time: 0, x: 0, y: 0 });
+  const [showHeartAnimation, setShowHeartAnimation] = useState(false);
+  const [heartPosition, setHeartPosition] = useState({ x: 0, y: 0 });
   const fetcher = useFetcher();
+
+  const handleSave = (videoId: string, currentlySaved: boolean) => {
+    fetcher.submit(
+      {
+        videoId,
+        action: currentlySaved ? "unsave" : "save",
+      },
+      { method: "post" }
+    );
+  };
 
   const handleSwipe = (direction: string) => {
     if (direction === 'up' && currentIndex > 0) {
@@ -95,18 +108,52 @@ export default function FeedPage() {
     }
   };
 
-  const handleSave = (videoId: string, currentlySaved: boolean) => {
-    fetcher.submit(
-      {
-        videoId,
-        action: currentlySaved ? "unsave" : "save",
-      },
-      { method: "post" }
-    );
+  const handleDoubleTap = (e: React.TouchEvent | React.MouseEvent, video: any) => {
+    e.stopPropagation();
+    const currentTime = new Date().getTime();
+    const tapPosition = {
+      x: 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX,
+      y: 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY,
+    };
+    
+    // Check if it's a double tap (within 300ms and 30px radius)
+    const timeDiff = currentTime - lastTap.time;
+    const xDiff = Math.abs(tapPosition.x - lastTap.x);
+    const yDiff = Math.abs(tapPosition.y - lastTap.y);
+    
+    if (timeDiff < 50 && xDiff < 30 && yDiff < 30) {
+      // Double tap detected
+      setHeartPosition(tapPosition);
+      setShowHeartAnimation(true);
+      setTimeout(() => setShowHeartAnimation(false), 1000);
+      handleSave(video.id, savedStates[currentIndex]);
+    }
+    
+    setLastTap({ time: currentTime, x: tapPosition.x, y: tapPosition.y });
   };
 
   return (
     <div className="fixed inset-0 bg-black">
+      {/* Heart Animation */}
+      <AnimatePresence>
+        {showHeartAnimation && (
+          <motion.div
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1.5, opacity: 1 }}
+            exit={{ scale: 1, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed z-50 pointer-events-none"
+            style={{ 
+              left: heartPosition.x - 25,
+              top: heartPosition.y - 25,
+              transform: 'translate(-50%, -50%)'
+            }}
+          >
+            <Heart className="w-12 h-12 text-red-500 fill-current" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Navigation Bar */}
       <div className="absolute top-4 left-4 right-4 z-50 flex justify-between items-center">
         <div className="w-[88px]">
@@ -171,16 +218,22 @@ export default function FeedPage() {
           >
             <div className="relative w-full h-full flex items-center justify-center">
               {index === currentIndex ? 
-                <mux-player
-                  className="w-full h-full max-h-screen object-contain"
-                  playback-id={video.muxPlaybackId}
-                  metadata-video-title={video.title}
-                  stream-type="on-demand"
-                  autoplay="muted"
-                  loop={true}
-                  defaultHidden={true}
-                  playsinline={true}
-                /> : 
+                <div 
+                  className="relative w-full h-full flex items-center justify-center"
+                  onTouchStart={e => !showFullDescription && handleDoubleTap(e, video)}
+                  onClick={e => !showFullDescription && handleDoubleTap(e, video)}
+                >
+                  <mux-player
+                    className="w-full h-full max-h-screen object-contain"
+                    playback-id={video.muxPlaybackId}
+                    metadata-video-title={video.title}
+                    stream-type="on-demand"
+                    autoplay="muted"
+                    loop={true}
+                    defaultHidden={true}
+                    playsinline={true}
+                  />
+                </div> : 
                 <mux-player
                   className="w-full h-full max-h-screen object-contain"
                   playback-id={video.muxPlaybackId}
