@@ -10,13 +10,6 @@ import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Textarea } from "~/components/ui/textarea";
 import { Switch } from "~/components/ui/switch";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -24,10 +17,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { ArrowLeft, Trash2, CircleDollarSign, MapPin, Bed, Bath, ChevronUp, Mail, Heart, Share2, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowLeft, Trash2, Bed, Bath, ChevronUp, Mail, Heart, Share2, CheckCircle2, XCircle, Play } from "lucide-react";
 import { Link } from "@remix-run/react";
 import "@mux/mux-player";
-import MuxPlayerElement from "@mux/mux-player";
 import { useState } from "react";
 import { AddressPicker } from "~/components/ui/address-picker";
 
@@ -171,33 +163,33 @@ export default function EditListing() {
                   />
                 </div>
               )}
-              
+
               {/* Property Info Overlay */}
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/50 to-transparent">
                 <div className="p-6 space-y-3">
                   {/* Price and Availability */}
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-white">
-                      <CircleDollarSign className="w-5 h-5" />
+                    <div className="text-white">
                       <span className="text-2xl font-bold">${video.price}/mo</span>
                     </div>
-                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-sm ${
-                      video.available 
-                        ? 'bg-green-500/20 text-green-300'
-                        : 'bg-gray-500/20 text-gray-300'
-                    }`}>
-                      {video.available 
-                        ? <><CheckCircle2 className="w-4 h-4" /> Available</>
-                        : <><XCircle className="w-4 h-4" /> Not Available</>
-                      }
-                    </span>
                   </div>
 
                   {/* Title and Location */}
                   <div>
-                    <h2 className="text-xl font-semibold text-white">{video.title}</h2>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-xl font-semibold text-white">{video.title}</h2>
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${
+                        video.available 
+                          ? 'bg-green-500/20 text-green-300'
+                          : 'bg-gray-500/20 text-gray-300'
+                      }`}>
+                        {video.available 
+                          ? <><CheckCircle2 className="w-3 h-3" /> Available</>
+                          : <><XCircle className="w-3 h-3" /> Not Available</>
+                        }
+                      </span>
+                    </div>
                     <div className="flex items-center gap-1 text-white/80 mt-1">
-                      <MapPin className="w-4 h-4" />
                       <span>{video.address}</span>
                     </div>
                   </div>
@@ -224,7 +216,7 @@ export default function EditListing() {
                 </div>
               </div>
 
-              {/* Side Actions Preview */}
+              {/* Side Actions */}
               <div className="absolute right-4 bottom-32 flex flex-col gap-6">
                 <div className="group flex flex-col items-center gap-1">
                   <div className="p-3 rounded-full bg-white/10 text-white">
@@ -246,6 +238,11 @@ export default function EditListing() {
                   </div>
                   <span className="text-white text-xs">Share</span>
                 </div>
+              </div>
+
+              {/* Play Button Overlay */}
+              <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 hover:opacity-100 transition-opacity">
+                <Play className="w-12 h-12 text-white" />
               </div>
             </div>
 

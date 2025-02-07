@@ -2,7 +2,6 @@ import { json, type ActionFunctionArgs } from "@remix-run/node";
 import { useLoaderData, useFetcher } from "@remix-run/react";
 import { motion, AnimatePresence } from "framer-motion";
 import "@mux/mux-player";
-import MuxPlayerElement from "@mux/mux-player";
 import { useState, useRef, useEffect } from "react";
 import { prisma } from "~/db.server";
 import { requireUser } from "~/session.server";
@@ -12,8 +11,6 @@ import {
   Heart,
   Share2,
   Phone,
-  ChevronUp,
-  ChevronDown,
   Settings,
   ArrowLeft,
   MapPin,
@@ -261,7 +258,6 @@ export default function FeedPage() {
                   {/* Price and Availability */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-white">
-                      <CircleDollarSign className="w-5 h-5" />
                       <span className="text-2xl font-bold">${video.price}/mo</span>
                     </div>
                   </div>
@@ -282,7 +278,6 @@ export default function FeedPage() {
                       </span>
                     </div>
                     <div className="flex items-center gap-1 text-white/80 mt-1">
-                      <MapPin className="w-4 h-4" />
                       <span>{video.address}</span>
                     </div>
                   </div>

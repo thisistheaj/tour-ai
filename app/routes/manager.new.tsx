@@ -3,35 +3,24 @@ import { json, redirect } from "@remix-run/node";
 import { Form, useActionData, useNavigation, useLoaderData } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import "@mux/mux-uploader";
-import MuxUploaderElement from "@mux/mux-uploader";
 import "@mux/mux-player";
-import MuxPlayerElement from "@mux/mux-player";
 import { requireUserId } from "~/session.server";
 import { createVideo } from "~/models/video.server";
 import mux from "~/lib/mux.server";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "~/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Textarea } from "~/components/ui/textarea";
 import { Switch } from "~/components/ui/switch";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
-  DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { CheckCircle2, Maximize2, Heart, MessageCircle, Share2, CircleDollarSign, MapPin, Bed, Bath, ChevronUp, Mail } from "lucide-react";
+import { CheckCircle2, Heart, Share2, Bed, Bath, ChevronUp, Mail, Play } from "lucide-react";
 import { AddressPicker } from "~/components/ui/address-picker";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -143,7 +132,6 @@ export default function NewListing() {
   const [uploadId, setUploadId] = useState<string | null>(null);
   const [uploadUrl, setUploadUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [showConfirmation, setShowConfirmation] = useState(false);
   const [formData, setFormData] = useState<any>(null);
   const [videoData, setVideoData] = useState<{
     assetId: string;
@@ -151,7 +139,6 @@ export default function NewListing() {
     status: string;
     title: string;
   } | null>(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState("");
   const [selectedCity, setSelectedCity] = useState("austin");
 
@@ -211,16 +198,6 @@ export default function NewListing() {
     } else {
       // Step 1 (video upload)
       e.currentTarget.submit();
-    }
-  };
-
-  const toggleFullscreen = (videoElement: HTMLVideoElement) => {
-    if (!document.fullscreenElement) {
-      videoElement.requestFullscreen();
-      setIsFullscreen(true);
-    } else {
-      document.exitFullscreen();
-      setIsFullscreen(false);
     }
   };
 
@@ -371,20 +348,20 @@ export default function NewListing() {
                     <div className="p-6 space-y-3">
                       {/* Price and Availability */}
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-white">
-                          <CircleDollarSign className="w-5 h-5" />
+                        <div className="text-white">
                           <span className="text-2xl font-bold">${formData?.price || '0'}/mo</span>
                         </div>
-                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-sm bg-green-500/20 text-green-300">
-                          <CheckCircle2 className="w-4 h-4" /> Available
-                        </span>
                       </div>
 
                       {/* Title and Location */}
                       <div>
-                        <h2 className="text-xl font-semibold text-white">{videoData?.title || 'Property Title'}</h2>
+                        <div className="flex items-center gap-2">
+                          <h2 className="text-xl font-semibold text-white">{videoData?.title || 'Property Title'}</h2>
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-green-500/20 text-green-300">
+                            <CheckCircle2 className="w-3 h-3" /> Available
+                          </span>
+                        </div>
                         <div className="flex items-center gap-1 text-white/80 mt-1">
-                          <MapPin className="w-4 h-4" />
                           <span>{formData?.address || 'Property Address'}</span>
                         </div>
                       </div>
@@ -411,7 +388,7 @@ export default function NewListing() {
                     </div>
                   </div>
 
-                  {/* Side Actions Preview */}
+                  {/* Side Actions */}
                   <div className="absolute right-4 bottom-32 flex flex-col gap-6">
                     <div className="group flex flex-col items-center gap-1">
                       <div className="p-3 rounded-full bg-white/10 text-white">
@@ -433,6 +410,11 @@ export default function NewListing() {
                       </div>
                       <span className="text-white text-xs">Share</span>
                     </div>
+                  </div>
+
+                  {/* Play Button Overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 hover:opacity-100 transition-opacity">
+                    <Play className="w-12 h-12 text-white" />
                   </div>
                 </div>
 
