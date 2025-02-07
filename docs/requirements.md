@@ -78,7 +78,7 @@ As a renter, I want to contact property managers
 -[x] replace blue color
 -[x] style login and signup
 -[x] make drawer translucent
--[ ] screen size ratio
+-[x] screen size ratio
 -Features:
 -[x] double tap to save
 -[ ] places API + map view
@@ -90,6 +90,7 @@ As a renter, I want to contact property managers
 -[x] consistent previews in confirm and edit views
 -[x] video volume — why does only one video have sound on? why isnt it the first
 -[x] video scrolling (w/ window and preloading)
+-[ ] screen size on load
 -[ ] fix '/apple-touch-icon.png' 404 error
 
 ## code q

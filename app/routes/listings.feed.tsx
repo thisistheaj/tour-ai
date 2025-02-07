@@ -202,9 +202,11 @@ export default function FeedPage() {
             initial={{ opacity: 0 }}
             animate={{ 
               opacity: index === currentIndex ? 1 : 0,
+              scale: 1,
               pointerEvents: index === currentIndex ? "auto" : "none"
             }}
-            exit={{ opacity: 0 }}
+            exit={{ opacity: 0, scale: 1 }}
+            transition={{ duration: 0.15 }}
             drag="y"
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={1}
@@ -217,33 +219,23 @@ export default function FeedPage() {
             }}
           >
             <div className="relative w-full h-full flex items-center justify-center">
-              {index === currentIndex ? 
-                <div 
-                  className="relative w-full h-full flex items-center justify-center"
-                  onTouchStart={e => !showFullDescription && handleDoubleTap(e, video)}
-                  onClick={e => !showFullDescription && handleDoubleTap(e, video)}
-                >
-                  <mux-player
-                    className="w-full h-full max-h-screen object-contain"
-                    playback-id={video.muxPlaybackId}
-                    metadata-video-title={video.title}
-                    stream-type="on-demand"
-                    autoplay="muted"
-                    loop={true}
-                    defaultHidden={true}
-                    playsinline={true}
-                  />
-                </div> : 
+              <div 
+                className="relative w-full h-full flex items-center justify-center"
+                onTouchStart={e => !showFullDescription && handleDoubleTap(e, video)}
+                onClick={e => !showFullDescription && handleDoubleTap(e, video)}
+              >
                 <mux-player
                   className="w-full h-full max-h-screen object-contain"
                   playback-id={video.muxPlaybackId}
                   metadata-video-title={video.title}
                   stream-type="on-demand"
+                  autoplay="muted"
+                  preload="auto"
                   loop={true}
                   defaultHidden={true}
                   playsinline={true}
                 />
-              }
+              </div>
               {/* Property Info Overlay */}
               <div 
                 className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/50 to-transparent"
