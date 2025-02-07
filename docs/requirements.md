@@ -90,7 +90,7 @@ As a renter, I want to contact property managers
 -[x] consistent previews in confirm and edit views
 -[x] video volume — why does only one video have sound on? why isnt it the first
 -[x] video scrolling (w/ window and preloading)
--[ ] screen size on load
+-[x] screen size on load
 -[ ] fix '/apple-touch-icon.png' 404 error
 
 ## code q

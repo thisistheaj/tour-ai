@@ -3,7 +3,7 @@ import { useLoaderData, useFetcher } from "@remix-run/react";
 import { motion, AnimatePresence } from "framer-motion";
 import "@mux/mux-player";
 import MuxPlayerElement from "@mux/mux-player";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { prisma } from "~/db.server";
 import { requireUser } from "~/session.server";
 import { isListingSaved, saveListing, unsaveListing } from "~/models/video.server";
@@ -85,6 +85,22 @@ export default function FeedPage() {
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
   const [heartPosition, setHeartPosition] = useState({ x: 0, y: 0 });
   const fetcher = useFetcher();
+  const videoRefs = useRef<{ [key: string]: any }>({});
+
+  useEffect(() => {
+    // Stop all videos
+    Object.values(videoRefs.current).forEach((player: any) => {
+      if (player && player.pause) {
+        player.pause();
+      }
+    });
+    
+    // Play current video
+    const currentPlayer = videoRefs.current[videos[currentIndex]?.id];
+    if (currentPlayer) {
+      currentPlayer.play();
+    }
+  }, [currentIndex, videos]);
 
   const handleSave = (videoId: string, currentlySaved: boolean) => {
     fetcher.submit(
@@ -225,11 +241,12 @@ export default function FeedPage() {
                 onClick={e => !showFullDescription && handleDoubleTap(e, video)}
               >
                 <mux-player
+                  ref={el => { videoRefs.current[video.id] = el; }}
                   className="w-full h-full max-h-screen object-contain"
                   playback-id={video.muxPlaybackId}
                   metadata-video-title={video.title}
                   stream-type="on-demand"
-                  autoplay="muted"
+                  autoplay={false}
                   preload="auto"
                   loop={true}
                   defaultHidden={true}
