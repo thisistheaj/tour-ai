@@ -112,7 +112,7 @@ export default function ManagerDashboard() {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-2">
               {videos.map((video: any) => (
                 <Link
                   key={video.id}
@@ -128,51 +128,37 @@ export default function ManagerDashboard() {
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-                      <p className="text-sm text-gray-500">Processing...</p>
+                      <p className="text-xs text-gray-500">Processing...</p>
                     </div>
                   )}
 
-                  {/* Play Button Overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Play className="w-12 h-12 text-white" />
+                  {/* Title Overlay - Top */}
+                  <div className="absolute inset-x-0 top-0 bg-gradient-to-b from-black/70 to-transparent p-2">
+                    <h3 className="font-medium text-white text-xs truncate">
+                      {video.title}
+                    </h3>
                   </div>
 
-                  {/* Info Overlay */}
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/50 to-transparent p-4">
-                    <div className="space-y-2">
-                      {/* Price and Availability */}
-                      <div className="flex items-center justify-between">
-                        <span className="text-lg font-bold text-white">
+                  {/* Play Button Overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Play className="w-8 h-8 text-white" />
+                  </div>
+
+                  {/* Price/Availability Overlay - Bottom */}
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black to-transparent p-2">
+                    <div className="flex items-center justify-between gap-1">
+                      <div className="min-w-0">
+                        <h3 className="font-medium text-white text-sm truncate">
                           ${video.price}/mo
-                        </span>
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs ${
-                          video.available 
-                            ? 'bg-green-500/20 text-green-300'
-                            : 'bg-gray-500/20 text-gray-300'
-                        }`}>
-                          {video.available ? 'Available' : 'Not Available'}
-                        </span>
+                        </h3>
                       </div>
-
-                      {/* Title */}
-                      <div>
-                        <h3 className="font-medium text-white truncate">{video.title}</h3>
-                        <p className="text-sm text-white/80 truncate">
-                          {video.address}
-                        </p>
-                      </div>
-
-                      {/* Details */}
-                      <div className="flex items-center gap-3 text-sm text-white/90">
-                        <div className="flex items-center gap-1">
-                          <Bed className="w-4 h-4" />
-                          <span>{video.bedrooms}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Bath className="w-4 h-4" />
-                          <span>{video.bathrooms}</span>
-                        </div>
-                      </div>
+                      <span className={`shrink-0 px-1.5 py-0.5 rounded-full text-[10px] ${
+                        video.available 
+                          ? 'bg-green-500/20 text-green-300'
+                          : 'bg-gray-500/20 text-gray-300'
+                      }`}>
+                        {video.available ? 'Available' : 'Unavailable'}
+                      </span>
                     </div>
                   </div>
                 </Link>

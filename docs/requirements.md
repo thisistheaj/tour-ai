@@ -94,8 +94,8 @@ As a renter, I want to contact property managers
 -[x] video volume — why does only one video have sound on? why isnt it the first
 -[x] video scrolling (w/ window and preloading)
 -[x] screen size on load
--[ ] mute by default
--[ ] replace video in edit
+-[x] mute by default
+-[x] replace video in edit
 -[ ] fix '/apple-touch-icon.png' 404 error
 
 ## code q
