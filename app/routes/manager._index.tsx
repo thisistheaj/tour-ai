@@ -3,7 +3,7 @@ import { Link, useLoaderData } from "@remix-run/react";
 import { requireUser } from "~/session.server";
 import { getVideoListItems } from "~/models/video.server";
 import { Button } from "~/components/ui/button";
-import { PlusCircle, Home, Settings, LogOut, Play } from "lucide-react";
+import { Video, Home, Settings, LogOut, Play } from "lucide-react";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireUser(request);
@@ -63,7 +63,7 @@ export default function ManagerDashboard() {
             asChild
           >
             <Link to="/manager/new">
-              <PlusCircle className="w-6 h-6" />
+              <Video className="w-6 h-6" />
               <div>
                 <div className="font-semibold">Record New Tour</div>
                 <div className="text-sm opacity-90">Share your property with potential renters</div>

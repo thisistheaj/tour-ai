@@ -17,10 +17,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { ArrowLeft, Trash2, Bed, Bath, ChevronUp, Mail, Heart, Share2, CheckCircle2, XCircle, Play } from "lucide-react";
+import { ArrowLeft, Trash2, Bed, Bath, ChevronUp, Mail, Heart, Share2, CheckCircle2, XCircle, Play, Video } from "lucide-react";
 import { Link } from "@remix-run/react";
 import "@mux/mux-player";
-import { useState } from "react";
+import "@mux/mux-uploader";
+import { useState, useEffect } from "react";
 import { AddressPicker } from "~/components/ui/address-picker";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
@@ -52,6 +53,52 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
   const formData = await request.formData();
   const intent = formData.get("intent");
+
+  // Handle video replacement
+  if (intent === "replace-video") {
+    const muxUploadId = formData.get("muxUploadId");
+    
+    if (typeof muxUploadId !== "string") {
+      return json(
+        { errors: { upload: "Upload ID is required" } },
+        { status: 400 }
+      );
+    }
+
+    try {
+      const mux = await import("~/lib/mux.server").then(mod => mod.default);
+      const upload = await mux.video.uploads.retrieve(muxUploadId);
+      
+      if (!upload.asset_id) {
+        return json(
+          { errors: { upload: "Video upload not yet processed" } },
+          { status: 400 }
+        );
+      }
+
+      const asset = await mux.video.assets.retrieve(upload.asset_id);
+      
+      await updateVideo({
+        id: videoId,
+        userId,
+        muxAssetId: asset.id,
+        muxPlaybackId: asset.playback_ids?.[0]?.id,
+      });
+
+      return json({ 
+        success: true,
+        assetId: asset.id,
+        playbackId: asset.playback_ids?.[0]?.id,
+        status: asset.status,
+      });
+    } catch (error) {
+      console.error("Error replacing video:", error);
+      return json(
+        { errors: { upload: "Error processing video upload" } },
+        { status: 500 }
+      );
+    }
+  }
 
   // Handle deletion
   if (intent === "delete") {
@@ -114,8 +161,34 @@ export default function EditListing() {
   const actionData = useActionData<typeof action>();
   const isSubmitting = navigation.state === "submitting";
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showReplaceDialog, setShowReplaceDialog] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(video.address || "");
   const [selectedCity, setSelectedCity] = useState(video.city || "austin");
+  const [uploadId, setUploadId] = useState<string | null>(null);
+  const [uploadUrl, setUploadUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [videoPlaybackId, setVideoPlaybackId] = useState(video.muxPlaybackId);
+
+  useEffect(() => {
+    async function createUploadUrl() {
+      const response = await fetch("/videos/create-upload", { method: "POST" });
+      const { url, id } = await response.json();
+      setUploadUrl(url);
+      setUploadId(id);
+    }
+    if (showReplaceDialog) {
+      createUploadUrl();
+    }
+  }, [showReplaceDialog]);
+
+  // Handle successful video replacement
+  useEffect(() => {
+    if ((actionData as any)?.success) {
+      setVideoPlaybackId((actionData as any).playbackId);
+      setShowReplaceDialog(false);
+      setIsUploading(false);
+    }
+  }, [actionData]);
 
   const handleAddressSelect = (address: string, city: string) => {
     setSelectedAddress(address);
@@ -137,6 +210,16 @@ export default function EditListing() {
         <CardHeader>
           <CardTitle>Edit Property Tour</CardTitle>
           <CardDescription>Update your property details and availability</CardDescription>
+          <Button
+            type="button"
+            variant="default"
+            size="sm"
+            onClick={() => setShowReplaceDialog(true)}
+            className="bg-black hover:bg-black/90 text-white mt-4 w-full sm:w-auto"
+          >
+            <Video className="w-4 h-4 mr-2" />
+            Rerecord Tour
+          </Button>
         </CardHeader>
 
         <CardContent>
@@ -149,11 +232,11 @@ export default function EditListing() {
 
             {/* Video Preview */}
             <div className="relative aspect-[9/16] bg-black rounded-lg overflow-hidden mx-auto max-w-sm">
-              {video.muxPlaybackId && (
+              {videoPlaybackId && (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <mux-player
                     stream-type="on-demand"
-                    playback-id={video.muxPlaybackId}
+                    playback-id={videoPlaybackId}
                     metadata-video-title={video.title}
                     className="w-full h-full object-contain"
                     autoplay="muted"
@@ -353,6 +436,61 @@ export default function EditListing() {
           </Form>
         </CardContent>
       </Card>
+
+      {/* Replace Video Dialog */}
+      <Dialog open={showReplaceDialog} onOpenChange={setShowReplaceDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Replace Property Tour Video</DialogTitle>
+            <DialogDescription>
+              Upload a new video to replace the current property tour.
+            </DialogDescription>
+          </DialogHeader>
+
+          {uploadUrl && (
+            <Form method="post" className="space-y-4">
+              <input type="hidden" name="intent" value="replace-video" />
+              <input type="hidden" name="muxUploadId" value={uploadId || ""} />
+              
+              <div className="space-y-2">
+                <Label>Upload New Video</Label>
+                <div className="border-2 border-dashed rounded-lg p-4">
+                  <mux-uploader
+                    className="w-full"
+                    endpoint={uploadUrl}
+                    onUploadStart={() => setIsUploading(true)}
+                    onSuccess={() => {
+                      // Submit the form when upload is complete
+                      const form = document.querySelector('form[method="post"]') as HTMLFormElement;
+                      form?.submit();
+                    }}
+                    capture="environment"
+                    aspect-ratio="9:16"
+                    preferred-camera-facing-mode="user"
+                  />
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowReplaceDialog(false)}
+                  disabled={isUploading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={!uploadId || isUploading}
+                >
+                  {isUploading ? "Uploading..." : "Replace Video"}
+                </Button>
+              </DialogFooter>
+            </Form>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
