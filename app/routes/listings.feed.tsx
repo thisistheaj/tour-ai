@@ -241,7 +241,7 @@ export default function FeedPage() {
                 onClick={e => !showFullDescription && handleDoubleTap(e, video)}
               >
                 <mux-player
-                  ref={el => { videoRefs.current[video.id] = el; }}
+                  ref={(el: any) => { videoRefs.current[video.id] = el as any; }}
                   className="w-full h-full max-h-screen object-contain"
                   playback-id={video.muxPlaybackId}
                   metadata-video-title={video.title}

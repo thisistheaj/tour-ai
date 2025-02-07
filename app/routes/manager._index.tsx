@@ -121,7 +121,7 @@ export default function ManagerDashboard() {
                 >
                   <div className="flex items-start gap-4">
                     {/* Video Thumbnail */}
-                    <div className="relative aspect-[9/16] w-24 bg-gray-100 rounded overflow-hidden">
+                    <div className="relative aspect-[9/16] w-24 bg-gray-100 rounded overflow-hidden flex-shrink-0">
                       {video.muxPlaybackId ? (
                         <img
                           src={`https://image.mux.com/${video.muxPlaybackId}/thumbnail.jpg`}
@@ -146,7 +146,7 @@ export default function ManagerDashboard() {
                       <p className="text-sm text-gray-600 mt-1">
                         {video.bedrooms} beds • {video.bathrooms} baths
                       </p>
-                      <p className="text-sm text-gray-600 mt-1 truncate">
+                      <p className="text-sm text-gray-600 mt-1 truncate max-w-[200px]">
                         {video.address}
                       </p>
                       <div className="flex items-center gap-2 mt-2">

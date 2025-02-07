@@ -81,7 +81,10 @@ As a renter, I want to contact property managers
 -[x] screen size ratio
 -Features:
 -[x] double tap to save
--[ ] places API + map view
+-[x] places API + map view
+-[ ] map views
+-[ ] chat 
+
 
 ## Bugs
 -[x] UI visible behind status bar
@@ -91,6 +94,8 @@ As a renter, I want to contact property managers
 -[x] video volume — why does only one video have sound on? why isnt it the first
 -[x] video scrolling (w/ window and preloading)
 -[x] screen size on load
+-[ ] mute by default
+-[ ] replace video in edit
 -[ ] fix '/apple-touch-icon.png' 404 error
 
 ## code q
@@ -123,8 +128,3 @@ As a renter, I want to contact property managers
 -[x] find enhancements
 -[ ] test long descriptions
 -[ ] vet user stories 
-
-
-
-
-

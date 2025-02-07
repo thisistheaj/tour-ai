@@ -1,6 +1,6 @@
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { Form, useActionData, useNavigation } from "@remix-run/react";
+import { Form, useActionData, useNavigation, useLoaderData } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import "@mux/mux-uploader";
 import MuxUploaderElement from "@mux/mux-uploader";
@@ -32,6 +32,7 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { CheckCircle2, Maximize2, Heart, MessageCircle, Share2, CircleDollarSign, MapPin, Bed, Bath, ChevronUp, Mail } from "lucide-react";
+import { AddressPicker } from "~/components/ui/address-picker";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const userId = await requireUserId(request);
@@ -128,9 +129,16 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   return json({ errors: { form: "Invalid step" } }, { status: 400 });
 };
 
+export async function loader() {
+  return json({
+    GOOGLE_PLACES_API_KEY: process.env.GOOGLE_PLACES_API_KEY
+  });
+}
+
 export default function NewListing() {
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
+  const { GOOGLE_PLACES_API_KEY } = useLoaderData<typeof loader>();
   const [step, setStep] = useState(1);
   const [uploadId, setUploadId] = useState<string | null>(null);
   const [uploadUrl, setUploadUrl] = useState<string | null>(null);
@@ -144,6 +152,8 @@ export default function NewListing() {
     title: string;
   } | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState("");
+  const [selectedCity, setSelectedCity] = useState("austin");
 
   const stepTitles = {
     1: { title: "Record Tour", description: "Share a video walkthrough of your property" },
@@ -212,6 +222,11 @@ export default function NewListing() {
       document.exitFullscreen();
       setIsFullscreen(false);
     }
+  };
+
+  const handleAddressSelect = (address: string, city: string) => {
+    setSelectedAddress(address);
+    setSelectedCity(city.toLowerCase());
   };
 
   return (
@@ -283,27 +298,13 @@ export default function NewListing() {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="address">Address</Label>
-                  <Input
-                    id="address"
-                    name="address"
-                    placeholder="Enter property address..."
-                    required
-                  />
-                </div>
+                <AddressPicker
+                  onAddressSelect={handleAddressSelect}
+                  apiKey={GOOGLE_PLACES_API_KEY || ""}
+                />
 
-                <div className="space-y-2">
-                  <Label htmlFor="city">City</Label>
-                  <Select name="city" defaultValue="austin" required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a city" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="austin">Austin, Texas</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+                <input type="hidden" name="address" value={selectedAddress} />
+                <input type="hidden" name="city" value={selectedCity} />
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">

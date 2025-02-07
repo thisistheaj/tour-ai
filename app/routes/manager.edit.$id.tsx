@@ -29,6 +29,7 @@ import { Link } from "@remix-run/react";
 import "@mux/mux-player";
 import MuxPlayerElement from "@mux/mux-player";
 import { useState } from "react";
+import { AddressPicker } from "~/components/ui/address-picker";
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
   const userId = await requireUserId(request);
@@ -43,7 +44,10 @@ export async function loader({ request, params }: LoaderFunctionArgs) {
     throw new Response("Not Found", { status: 404 });
   }
 
-  return json({ video });
+  return json({ 
+    video,
+    GOOGLE_PLACES_API_KEY: process.env.GOOGLE_PLACES_API_KEY
+  });
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
@@ -113,11 +117,18 @@ export async function action({ request, params }: ActionFunctionArgs) {
 }
 
 export default function EditListing() {
-  const { video } = useLoaderData<typeof loader>();
+  const { video, GOOGLE_PLACES_API_KEY } = useLoaderData<typeof loader>();
   const navigation = useNavigation();
   const actionData = useActionData<typeof action>();
   const isSubmitting = navigation.state === "submitting";
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState(video.address || "");
+  const [selectedCity, setSelectedCity] = useState(video.city || "austin");
+
+  const handleAddressSelect = (address: string, city: string) => {
+    setSelectedAddress(address);
+    setSelectedCity(city.toLowerCase());
+  };
 
   return (
     <div className="container mx-auto p-4 pb-24">
@@ -265,30 +276,15 @@ export default function EditListing() {
               />
             </div>
 
-            {/* Address */}
-            <div className="space-y-2">
-              <Label htmlFor="address">Address</Label>
-              <Input
-                id="address"
-                name="address"
-                defaultValue={video.address || ""}
-                placeholder="Enter property address..."
-                required
-              />
-            </div>
+            {/* Replace Address and City fields with AddressPicker */}
+            <AddressPicker
+              defaultValue={video.address || ""}
+              onAddressSelect={handleAddressSelect}
+              apiKey={GOOGLE_PLACES_API_KEY || ""}
+            />
 
-            {/* City */}
-            <div className="space-y-2">
-              <Label htmlFor="city">City</Label>
-              <Select name="city" defaultValue={video.city || "austin"} required>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a city" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="austin">Austin, Texas</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <input type="hidden" name="address" value={selectedAddress} />
+            <input type="hidden" name="city" value={selectedCity} />
 
             {/* Bedrooms & Bathrooms */}
             <div className="grid grid-cols-2 gap-4">
