@@ -75,9 +75,8 @@ As a renter, I want to contact property managers
 -[x] setup service worker for PWA
 -[x] home screen icon
 -styles:
--[ ] replace blue color
--[ ] style login and signup
--[ ] change fonts?
+-[x] replace blue color
+-[x] style login and signup
 -[ ] screen size ratio
 -[ ] make drawer translucent
 -Features:
