@@ -63,8 +63,8 @@ As a renter, I want to contact property managers
 -[x] clean up unused routes and components
 -[x] standardize route naming convention
 -[x] improve type safety across routes
+-[x] gesture conflict: wiping + detail view fire simultaneously {desktop only}
 -[ ] mux deletions
--[ ] gesture conflict: wiping + detail view fire simultaneously {desktop only}
 
 ## Enhancements
 -[x] add functionality to settings link
@@ -77,8 +77,8 @@ As a renter, I want to contact property managers
 -styles:
 -[x] replace blue color
 -[x] style login and signup
+-[x] make drawer translucent
 -[ ] screen size ratio
--[ ] make drawer translucent
 -Features:
 -[ ] double tap to save
 -[ ] places API + map view
@@ -120,6 +120,7 @@ As a renter, I want to contact property managers
 ### QA 
 -[x] bug search
 -[x] find enhancements
+-[ ] test long descriptions
 -[ ] vet user stories 
 
 

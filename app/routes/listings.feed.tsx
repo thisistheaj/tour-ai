@@ -109,23 +109,35 @@ export default function FeedPage() {
     <div className="fixed inset-0 bg-black">
       {/* Navigation Bar */}
       <div className="absolute top-4 left-4 right-4 z-50 flex justify-between items-center">
-        {userType === "PROPERTY_MANAGER" ? (
-          <Link 
-            to="/manager" 
-            className="text-white flex items-center gap-2 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="text-sm">Back</span>
-          </Link>
-        ) : (
-          <Link 
-            to="/listings/settings" 
-            className="text-white flex items-center gap-2 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full transition-colors"
-          >
-            <Settings className="w-4 h-4" />
-            <span className="text-sm">Settings</span>
-          </Link>
-        )}
+        <div className="w-[88px]">
+          <AnimatePresence>
+            {!showFullDescription && (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                {userType === "PROPERTY_MANAGER" ? (
+                  <Link 
+                    to="/manager" 
+                    className="text-white flex items-center gap-2 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full transition-colors"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span className="text-sm">Back</span>
+                  </Link>
+                ) : (
+                  <Link 
+                    to="/listings/settings" 
+                    className="text-white flex items-center gap-2 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full transition-colors"
+                  >
+                    <Settings className="w-4 h-4" />
+                    <span className="text-sm">Settings</span>
+                  </Link>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
         <Link 
           to="/listings/saved" 
           className="text-white flex items-center gap-2 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full transition-colors"
@@ -182,7 +194,6 @@ export default function FeedPage() {
               {/* Property Info Overlay */}
               <div 
                 className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/50 to-transparent"
-                onClick={() => setShowFullDescription(!showFullDescription)}
               >
                 <div className="p-6 space-y-3">
                   {/* Price and Availability */}
@@ -191,21 +202,23 @@ export default function FeedPage() {
                       <CircleDollarSign className="w-5 h-5" />
                       <span className="text-2xl font-bold">${video.price}/mo</span>
                     </div>
-                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-sm ${
-                      video.available 
-                        ? 'bg-green-500/20 text-green-300'
-                        : 'bg-gray-500/20 text-gray-300'
-                    }`}>
-                      {video.available 
-                        ? <><CheckCircle2 className="w-4 h-4" /> Available</>
-                        : <><XCircle className="w-4 h-4" /> Not Available</>
-                      }
-                    </span>
                   </div>
 
                   {/* Title and Location */}
                   <div>
-                    <h2 className="text-xl font-semibold text-white">{video.title}</h2>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-xl font-semibold text-white">{video.title}</h2>
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-sm ${
+                        video.available 
+                          ? 'bg-green-500/20 text-green-300'
+                          : 'bg-gray-500/20 text-gray-300'
+                      }`}>
+                        {video.available 
+                          ? <><CheckCircle2 className="w-3 h-3" /> Available</>
+                          : <><XCircle className="w-3 h-3" /> Not Available</>
+                        }
+                      </span>
+                    </div>
                     <div className="flex items-center gap-1 text-white/80 mt-1">
                       <MapPin className="w-4 h-4" />
                       <span>{video.address}</span>
@@ -225,7 +238,7 @@ export default function FeedPage() {
                   </div>
 
                   {/* Description Preview */}
-                  <div className="text-white/80">
+                  <div className="text-white/80" onClick={() => setShowFullDescription(!showFullDescription)}>
                     <p className="line-clamp-2">{video.description}</p>
                     <button className="text-sm text-white/60 mt-1 flex items-center gap-1">
                       Tap for details <ChevronUpIcon className="w-4 h-4" />
@@ -246,8 +259,14 @@ export default function FeedPage() {
                     initial={{ opacity: 0, y: "100%" }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: "100%" }}
-                    transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                    className="absolute inset-0 bg-black/95 p-6 overflow-y-auto"
+                    transition={{ 
+                      type: "spring", 
+                      damping: 30,
+                      stiffness: 150,
+                      mass: 1.2,
+                      duration: 0.5
+                    }}
+                    className="absolute inset-0 bg-black/70 backdrop-blur-sm p-6 overflow-y-auto"
                     onClick={() => setShowFullDescription(false)}
                   >
                     <div className="max-w-2xl mx-auto space-y-6 py-12">
@@ -341,86 +360,92 @@ export default function FeedPage() {
               </AnimatePresence>
 
               {/* Side Actions */}
-              <div className="absolute right-4 bottom-32 flex flex-col gap-6">
-                <button 
-                  onClick={() => handleSave(video.id, savedStates[index])}
-                  className="group flex flex-col items-center gap-1"
-                >
-                  <div className={`p-3 rounded-full ${
-                    savedStates[index]
-                      ? 'bg-red-500 text-white'
-                      : 'bg-white/10 text-white group-hover:bg-white/20'
-                    } transition-colors`}
+              <AnimatePresence>
+                {!showFullDescription && (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute right-4 bottom-32 flex flex-col gap-6"
                   >
-                    <Heart className={`w-6 h-6 ${
-                      savedStates[index] ? 'fill-current' : ''
-                    }`} />
-                  </div>
-                  <span className="text-white text-xs">
-                    {savedStates[index] ? 'Saved' : 'Save'}
-                  </span>
-                </button>
+                    <button 
+                      onClick={() => handleSave(video.id, savedStates[index])}
+                      className="group flex flex-col items-center gap-1"
+                    >
+                      <div className={`p-3 rounded-full ${
+                        savedStates[index]
+                          ? 'bg-red-500 text-white'
+                          : 'bg-white/10 text-white group-hover:bg-white/20'
+                        } transition-colors`}
+                      >
+                        <Heart className={`w-6 h-6 ${
+                          savedStates[index] ? 'fill-current' : ''
+                        }`} />
+                      </div>
+                      <span className="text-white text-xs">
+                        {savedStates[index] ? 'Saved' : 'Save'}
+                      </span>
+                    </button>
 
-                {video.user.contactInfo ? (
-                  video.user.contactInfo.includes("@") ? (
-                    <a
-                      href={`mailto:${video.user.contactInfo}`}
+                    {video.user.contactInfo ? (
+                      video.user.contactInfo.includes("@") ? (
+                        <a
+                          href={`mailto:${video.user.contactInfo}`}
+                          className="group flex flex-col items-center gap-1"
+                        >
+                          <div className="p-3 rounded-full bg-white/10 text-white 
+                            group-hover:bg-white/20 transition-colors">
+                            <Mail className="w-6 h-6" />
+                          </div>
+                          <span className="text-white text-xs">Email</span>
+                        </a>
+                      ) : (
+                        <a
+                          href={`tel:${video.user.contactInfo.replace(/\D/g, '')}`}
+                          className="group flex flex-col items-center gap-1"
+                        >
+                          <div className="p-3 rounded-full bg-white/10 text-white 
+                            group-hover:bg-white/20 transition-colors">
+                            <Phone className="w-6 h-6" />
+                          </div>
+                          <span className="text-white text-xs">Call</span>
+                        </a>
+                      )
+                    ) : (
+                      <Link
+                        to={`/listings/${video.id}`}
+                        className="group flex flex-col items-center gap-1"
+                      >
+                        <div className="p-3 rounded-full bg-white/10 text-white 
+                          group-hover:bg-white/20 transition-colors">
+                          <Mail className="w-6 h-6" />
+                        </div>
+                        <span className="text-white text-xs">Contact</span>
+                      </Link>
+                    )}
+
+                    <button 
+                      onClick={() => {
+                        const shareUrl = `${window.location.origin}/listings/${video.id}`;
+                        navigator.share?.({
+                          title: video.title,
+                          text: `Check out this property: ${video.title}`,
+                          url: shareUrl,
+                        }).catch(() => {
+                          navigator.clipboard.writeText(shareUrl);
+                        });
+                      }}
                       className="group flex flex-col items-center gap-1"
                     >
                       <div className="p-3 rounded-full bg-white/10 text-white 
                         group-hover:bg-white/20 transition-colors">
-                        <Mail className="w-6 h-6" />
+                        <Share2 className="w-6 h-6" />
                       </div>
-                      <span className="text-white text-xs">Email</span>
-                    </a>
-                  ) : (
-                    // Clean phone number by removing non-numeric characters
-                    <a
-                      href={`tel:${video.user.contactInfo.replace(/\D/g, '')}`}
-                      className="group flex flex-col items-center gap-1"
-                    >
-                      <div className="p-3 rounded-full bg-white/10 text-white 
-                        group-hover:bg-white/20 transition-colors">
-                        <Phone className="w-6 h-6" />
-                      </div>
-                      <span className="text-white text-xs">Call</span>
-                    </a>
-                  )
-                ) : (
-                  // If no contact info, link to the full listing page
-                  <Link
-                    to={`/listings/${video.id}`}
-                    className="group flex flex-col items-center gap-1"
-                  >
-                    <div className="p-3 rounded-full bg-white/10 text-white 
-                      group-hover:bg-white/20 transition-colors">
-                      <Mail className="w-6 h-6" />
-                    </div>
-                    <span className="text-white text-xs">Contact</span>
-                  </Link>
+                      <span className="text-white text-xs">Share</span>
+                    </button>
+                  </motion.div>
                 )}
-
-                <button 
-                  onClick={() => {
-                    const shareUrl = `${window.location.origin}/listings/${video.id}`;
-                    navigator.share?.({
-                      title: video.title,
-                      text: `Check out this property: ${video.title}`,
-                      url: shareUrl,
-                    }).catch(() => {
-                      // Fallback to copying link
-                      navigator.clipboard.writeText(shareUrl);
-                    });
-                  }}
-                  className="group flex flex-col items-center gap-1"
-                >
-                  <div className="p-3 rounded-full bg-white/10 text-white 
-                    group-hover:bg-white/20 transition-colors">
-                    <Share2 className="w-6 h-6" />
-                  </div>
-                  <span className="text-white text-xs">Share</span>
-                </button>
-              </div>
+              </AnimatePresence>
             </div>
           </motion.div>
         ))}
