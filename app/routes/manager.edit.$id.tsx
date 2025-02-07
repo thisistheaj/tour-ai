@@ -83,7 +83,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
         userId,
         muxAssetId: asset.id,
         muxPlaybackId: asset.playback_ids?.[0]?.id,
-      });
+      } as any);
 
       return json({ 
         success: true,
@@ -224,9 +224,9 @@ export default function EditListing() {
 
         <CardContent>
           <Form method="post" className="space-y-6">
-            {(actionData?.errors as any)?.form && (
+            {((actionData as any)?.errors as any)?.form && (
               <Alert variant="destructive">
-                <AlertDescription>{(actionData?.errors as any).form}</AlertDescription>
+                <AlertDescription>{(actionData as any).errors.form}</AlertDescription>
               </Alert>
             )}
 

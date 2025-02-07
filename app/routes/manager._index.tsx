@@ -3,7 +3,7 @@ import { Link, useLoaderData } from "@remix-run/react";
 import { requireUser } from "~/session.server";
 import { getVideoListItems } from "~/models/video.server";
 import { Button } from "~/components/ui/button";
-import { Video, Home, Settings, LogOut, Play } from "lucide-react";
+import { Video, Home, Settings, LogOut, Play, Bed, Bath } from "lucide-react";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const user = await requireUser(request);
@@ -112,55 +112,53 @@ export default function ManagerDashboard() {
               </Button>
             </div>
           ) : (
-            <div className="grid gap-4">
+            <div className="grid grid-cols-2 gap-2">
               {videos.map((video: any) => (
                 <Link
                   key={video.id}
                   to={`/manager/edit/${video.id}`}
-                  className="block bg-white rounded-lg border p-4 hover:border-blue-500 transition-colors"
+                  className="block aspect-[9/16] relative rounded-lg overflow-hidden group bg-gray-100"
                 >
-                  <div className="flex items-start gap-4">
-                    {/* Video Thumbnail */}
-                    <div className="relative aspect-[9/16] w-24 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                      {video.muxPlaybackId ? (
-                        <img
-                          src={`https://image.mux.com/${video.muxPlaybackId}/thumbnail.jpg`}
-                          alt={video.title}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-                          <p className="text-xs text-gray-500">Processing...</p>
-                        </div>
-                      )}
-                      {video.status === 'ready' && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 hover:opacity-100 transition-opacity">
-                          <Play className="w-8 h-8 text-white" />
-                        </div>
-                      )}
+                  {/* Thumbnail */}
+                  {video.muxPlaybackId ? (
+                    <img
+                      src={`https://image.mux.com/${video.muxPlaybackId}/thumbnail.jpg?time=0`}
+                      alt={video.title}
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                      <p className="text-xs text-gray-500">Processing...</p>
                     </div>
+                  )}
 
-                    {/* Video Info */}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium truncate">{video.title}</h3>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {video.bedrooms} beds • {video.bathrooms} baths
-                      </p>
-                      <p className="text-sm text-gray-600 mt-1 truncate max-w-[200px]">
-                        {video.address}
-                      </p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
-                          video.available 
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-gray-100 text-gray-700'
-                        }`}>
-                          {video.available ? 'Available' : 'Not Available'}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          ${video.price}/month
-                        </span>
+                  {/* Title Overlay - Top */}
+                  <div className="absolute inset-x-0 top-0 bg-gradient-to-b from-black/70 to-transparent p-2">
+                    <h3 className="font-medium text-white text-xs truncate">
+                      {video.title}
+                    </h3>
+                  </div>
+
+                  {/* Play Button Overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Play className="w-8 h-8 text-white" />
+                  </div>
+
+                  {/* Price/Availability Overlay - Bottom */}
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black to-transparent p-2">
+                    <div className="flex items-center justify-between gap-1">
+                      <div className="min-w-0">
+                        <h3 className="font-medium text-white text-sm truncate">
+                          ${video.price}/mo
+                        </h3>
                       </div>
+                      <span className={`shrink-0 px-1.5 py-0.5 rounded-full text-[10px] ${
+                        video.available 
+                          ? 'bg-green-500/20 text-green-300'
+                          : 'bg-gray-500/20 text-gray-300'
+                      }`}>
+                        {video.available ? 'Available' : 'Unavailable'}
+                      </span>
                     </div>
                   </div>
                 </Link>
