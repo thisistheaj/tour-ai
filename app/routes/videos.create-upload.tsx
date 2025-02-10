@@ -14,6 +14,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     new_asset_settings: {
       playback_policy: ["public"],
       encoding_tier: "baseline",
+      mp4_support: "capped-1080p",
     },
     cors_origin: "*",
   });

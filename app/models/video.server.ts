@@ -34,6 +34,7 @@ interface CreateVideoInput {
   bathrooms?: number;
   description?: string;
   available?: boolean;
+  rooms?: any;
 }
 
 export async function createVideo({
@@ -73,6 +74,7 @@ interface UpdateVideoInput {
   bathrooms?: number;
   description?: string;
   available?: boolean;
+  rooms?: any;
 }
 
 export async function updateVideo({

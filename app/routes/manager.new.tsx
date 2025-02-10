@@ -22,6 +22,8 @@ import {
 } from "~/components/ui/dialog";
 import { CheckCircle2, Heart, Share2, Bed, Bath, ChevronUp, Mail, Play } from "lucide-react";
 import { AddressPicker } from "~/components/ui/address-picker";
+import { RoomAnalysis } from "~/components/room-analysis";
+import type { Room } from "~/lib/gemini.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const userId = await requireUserId(request);
@@ -70,8 +72,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   }
   }
 
-  // Step 2: Property Details
-  if (step === "2") {
+  // Step 3: Property Details & Final Submission
+  if (step === "3") {
     const price = formData.get("price");
     const address = formData.get("address");
     const city = formData.get("city");
@@ -81,6 +83,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     const available = formData.get("available") === "on";
     const assetId = formData.get("assetId");
     const playbackId = formData.get("playbackId");
+    const rooms = formData.get("rooms");
 
     if (!price || !address || !city || !bedrooms || !bathrooms || !description || !assetId || !playbackId) {
       return json(
@@ -103,6 +106,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         bathrooms: parseInt(bathrooms as string),
         description: description as string,
         available,
+        rooms: rooms ? JSON.parse(rooms as string) : null,
       });
 
       return redirect("/manager");
@@ -141,11 +145,13 @@ export default function NewListing() {
   } | null>(null);
   const [selectedAddress, setSelectedAddress] = useState("");
   const [selectedCity, setSelectedCity] = useState("austin");
+  const [analyzedRooms, setAnalyzedRooms] = useState<Room[] | null>(null);
 
   const stepTitles = {
     1: { title: "Record Tour", description: "Share a video walkthrough of your property" },
-    2: { title: "Property Info", description: "Tell renters about your property" },
-    3: { title: "Preview Tour", description: "See how your tour will look to renters" }
+    2: { title: "Analyze Rooms", description: "Let AI identify rooms in your tour" },
+    3: { title: "Property Info", description: "Tell renters about your property" },
+    4: { title: "Preview Tour", description: "See how your tour will look to renters" }
   };
 
   useEffect(() => {
@@ -167,7 +173,7 @@ export default function NewListing() {
         status: (actionData as any).status,
         title: (actionData as any).title
       });
-      setStep(2);
+      setStep(2); // Move to room analysis
     }
   }, [actionData]);
 
@@ -175,14 +181,23 @@ export default function NewListing() {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
     
-    if (step === 2) {
+    if (step === 3) {
       // Store form data and move to confirmation step
       setFormData(Object.fromEntries(data.entries()));
-      setStep(3);
-    } else if (step === 3) {
-      // Final submission
+      setStep(4);
+    } else if (step === 4) {
+      // Final submission - include rooms data
       const form = document.createElement('form');
       form.method = 'post';
+      
+      // Add rooms data to form
+      if (analyzedRooms) {
+        const roomsInput = document.createElement('input');
+        roomsInput.type = 'hidden';
+        roomsInput.name = 'rooms';
+        roomsInput.value = JSON.stringify(analyzedRooms);
+        form.appendChild(roomsInput);
+      }
       
       Object.entries(formData).forEach(([key, value]) => {
         const input = document.createElement('input');
@@ -261,6 +276,15 @@ export default function NewListing() {
             <input type="hidden" name="muxUploadId" value={uploadId || ""} />
               </>
             ) : step === 2 ? (
+              <RoomAnalysis
+                videoId={videoData?.playbackId || ""}
+                onComplete={(rooms) => {
+                  setAnalyzedRooms(rooms);
+                  setStep(3);
+                }}
+                onSkip={() => setStep(3)}
+              />
+            ) : step === 3 ? (
               <>
                 <div className="space-y-2">
                   <Label htmlFor="price">Monthly Rent</Label>
@@ -326,7 +350,7 @@ export default function NewListing() {
                 </div>
               </>
             ) : (
-              // Step 3: Preview
+              // Step 4: Preview
               <div className="space-y-6">
                 {/* Video Preview */}
                 <div className="relative aspect-[9/16] bg-black rounded-lg overflow-hidden mx-auto max-w-sm">
@@ -439,33 +463,36 @@ export default function NewListing() {
               </div>
             )}
             
-            <div className="flex justify-between pt-4">
-              {step > 1 && (
+            {/* Only show navigation buttons for steps 1, 3, and 4 */}
+            {step !== 2 && (
+              <div className="flex justify-between pt-4">
+                {step > 1 && (
+                  <Button 
+                    type="button" 
+                    variant="outline"
+                    onClick={() => setStep(step - 1)}
+                  >
+                    Back
+                  </Button>
+                )}
                 <Button 
-                  type="button" 
-                  variant="outline"
-                  onClick={() => setStep(step - 1)}
+                  type="submit" 
+                  className={step === 1 ? "w-full" : ""}
+                  disabled={isUploading || navigation.state === "submitting"}
                 >
-                  Back
+                  {isUploading 
+                    ? "Uploading..." 
+                    : navigation.state === "submitting"
+                      ? "Posting..."
+                      : step === 1
+                      ? "Continue to Room Analysis"
+                      : step === 3
+                      ? "Preview Tour"
+                      : "Share Tour"
+                  }
                 </Button>
-              )}
-            <Button 
-              type="submit" 
-                className={step === 1 ? "w-full" : ""}
-              disabled={isUploading || navigation.state === "submitting"}
-            >
-              {isUploading 
-                ? "Uploading..." 
-                : navigation.state === "submitting"
-                  ? "Posting..."
-                  : step === 1
-                  ? "Continue to Property Details"
-                  : step === 2
-                  ? "Preview Tour"
-                  : "Share Tour"
-              }
-            </Button>
-            </div>
+              </div>
+            )}
           </Form>
         </CardContent>
       </Card>
@@ -495,15 +522,15 @@ export default function NewListing() {
             </div>
             <div className={`flex-1 h-0.5 mx-2 mb-4 ${step >= 2 ? 'bg-slate-800' : 'bg-gray-300'}`} />
             <div className="flex flex-col items-center">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${step >= 2 ? 'bg-slate-800 border-slate-800 text-white' : 'border-gray-300'}`}>
-                2
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${step >= 3 ? 'bg-slate-800 border-slate-800 text-white' : 'border-gray-300'}`}>
+                3
               </div>
               <span className="text-xs mt-1 font-medium">Info</span>
             </div>
-            <div className={`flex-1 h-0.5 mx-2 mb-4 ${step >= 3 ? 'bg-slate-800' : 'bg-gray-300'}`} />
+            <div className={`flex-1 h-0.5 mx-2 mb-4 ${step >= 4 ? 'bg-slate-800' : 'bg-gray-300'}`} />
             <div className="flex flex-col items-center">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${step >= 3 ? 'bg-slate-800 border-slate-800 text-white' : 'border-gray-300'}`}>
-                3
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${step >= 4 ? 'bg-slate-800 border-slate-800 text-white' : 'border-gray-300'}`}>
+                4
               </div>
               <span className="text-xs mt-1 font-medium">Preview</span>
             </div>
