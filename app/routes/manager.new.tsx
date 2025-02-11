@@ -522,10 +522,17 @@ export default function NewListing() {
             </div>
             <div className={`flex-1 h-0.5 mx-2 mb-4 ${step >= 2 ? 'bg-slate-800' : 'bg-gray-300'}`} />
             <div className="flex flex-col items-center">
+              <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${step >= 2 ? 'bg-slate-800 border-slate-800 text-white' : 'border-gray-300'}`}>
+                2
+              </div>
+              <span className="text-xs mt-1 font-medium">AI</span>
+            </div>
+            <div className={`flex-1 h-0.5 mx-2 mb-4 ${step >= 3 ? 'bg-slate-800' : 'bg-gray-300'}`} />
+            <div className="flex flex-col items-center">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${step >= 3 ? 'bg-slate-800 border-slate-800 text-white' : 'border-gray-300'}`}>
                 3
               </div>
-              <span className="text-xs mt-1 font-medium">Info</span>
+              <span className="text-xs mt-1 font-medium">Listing</span>
             </div>
             <div className={`flex-1 h-0.5 mx-2 mb-4 ${step >= 4 ? 'bg-slate-800' : 'bg-gray-300'}`} />
             <div className="flex flex-col items-center">

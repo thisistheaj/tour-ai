@@ -11,10 +11,33 @@ export type Room = {
   timestamp: string;
 };
 
-async function waitForMuxVideo(muxPlaybackId: string, maxAttempts = 10): Promise<ArrayBuffer> {
+export async function isMuxVideoReady(muxPlaybackId: string, maxAttempts = 100): Promise<boolean> {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
-      // Using the direct download URL format
+      const muxUrl = `https://stream.mux.com/${muxPlaybackId}/capped-1080p.mp4?download=true`;
+      const response = await fetch(muxUrl);
+      if (!response.ok) {
+        if (attempt === maxAttempts - 1) {
+          throw new Error(`Failed to check video status after ${maxAttempts} attempts`);
+        }
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        continue;
+      }
+      return !!response.ok;
+    } catch (error) {
+      if (attempt === maxAttempts - 1) {
+        throw new Error(`Failed to check video status after ${maxAttempts} attempts`);
+      }
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      continue;
+    }
+  }
+  return false;
+}
+
+export async function getMuxVideo(muxPlaybackId: string, maxAttempts = 10): Promise<ArrayBuffer> {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
       const muxUrl = `https://stream.mux.com/${muxPlaybackId}/capped-1080p.mp4?download=true`;
       const response = await fetch(muxUrl);
       
@@ -22,27 +45,23 @@ async function waitForMuxVideo(muxPlaybackId: string, maxAttempts = 10): Promise
         if (attempt === maxAttempts - 1) {
           throw new Error(`Failed to fetch video after ${maxAttempts} attempts`);
         }
-        // Wait 2 seconds before next attempt
         await new Promise(resolve => setTimeout(resolve, 2000));
         continue;
       }
-
       return await response.arrayBuffer();
     } catch (error) {
-      console.error(`Attempt ${attempt + 1} failed:`, error);
       if (attempt === maxAttempts - 1) {
         throw error;
       }
-      // Wait 2 seconds before next attempt
       await new Promise(resolve => setTimeout(resolve, 2000));
     }
   }
   throw new Error("Failed to fetch video");
 }
 
-export async function analyzeVideoRooms(muxPlaybackId: string): Promise<Room[]> {
+export async function analyzeVideo(muxPlaybackId: string): Promise<Room[]> {
   // Get video from Mux with retries
-  const arrayBuffer = await waitForMuxVideo(muxPlaybackId);
+  const arrayBuffer = await getMuxVideo(muxPlaybackId);
   const base64Data = Buffer.from(arrayBuffer).toString('base64');
   
   // Initialize Gemini
@@ -113,19 +132,3 @@ Always label bathrooms as "Bathroom" and kitchens as "Kitchen".`
     return [{ room: "Room 1", timestamp: "0:00" }];
   }
 }
-
-// Helper function to convert Blob to base64
-async function blobToBase64(blob: Blob): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (typeof reader.result === 'string') {
-        resolve(reader.result.split(',')[1]);
-      } else {
-        reject(new Error('Failed to convert blob to base64'));
-      }
-    };
-    reader.onerror = reject;
-    reader.readAsDataURL(blob);
-  });
-} 

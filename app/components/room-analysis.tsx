@@ -1,8 +1,21 @@
 import { useState, useEffect } from "react";
 import { Room } from "~/lib/gemini.server";
 import { Button } from "~/components/ui/button";
-import { Card } from "~/components/ui/card";
-import { Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { Brain, Video, X, XCircle } from "lucide-react";
+import { cn } from "~/lib/utils";
+
+function useAnimatedEllipsis() {
+  const [dots, setDots] = useState('.');
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDots(prev => prev.length >= 3 ? '.' : prev + '.');
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
+
+  return dots;
+}
 
 interface RoomAnalysisProps {
   videoId: string;  // This is muxPlaybackId
@@ -11,31 +24,49 @@ interface RoomAnalysisProps {
 }
 
 export function RoomAnalysis({ videoId: muxPlaybackId, onComplete, onSkip }: RoomAnalysisProps) {
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isWaitingForMux, setIsWaitingForMux] = useState(true);
+  const [isAIWatching, setIsAIWatching] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rooms, setRooms] = useState<Room[] | null>(null);
+  const [selectedRooms, setSelectedRooms] = useState<Room[]>([]);
+  const dots = useAnimatedEllipsis();
 
   const analyzeRooms = async () => {
-    setIsAnalyzing(true);
+    setIsWaitingForMux(true);
+    setIsAIWatching(false);
     setError(null);
 
     try {
-      const response = await fetch("/api/analyze-rooms", {
-        method: "POST",
-        body: new URLSearchParams({ muxPlaybackId }),
+      let response = await fetch(`/api/videos/${muxPlaybackId}/ready`, {
+        method: "GET",
       });
 
-      const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.error || "Failed to analyze rooms");
+        throw new Error("Failed to start room identification");
+      }
+
+      setIsWaitingForMux(false);
+      setIsAIWatching(true);
+      
+      response = await fetch(`/api/videos/${muxPlaybackId}/analyze`, {
+        method: "GET",
+      });
+
+
+
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
       }
 
       setRooms(data.rooms);
-      onComplete(data.rooms);
+      setSelectedRooms(data.rooms);
+      setIsAIWatching(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to analyze rooms");
-    } finally {
-      setIsAnalyzing(false);
+      setError(err instanceof Error ? err.message : "Failed to identify rooms");
+      setIsWaitingForMux(false);
+      setIsAIWatching(false);
     }
   };
 
@@ -43,14 +74,37 @@ export function RoomAnalysis({ videoId: muxPlaybackId, onComplete, onSkip }: Roo
     analyzeRooms();
   }, [muxPlaybackId]);
 
-  if (isAnalyzing) {
+  const toggleRoom = (room: Room) => {
+    setSelectedRooms(prev => 
+      prev.find(r => r.room === room.room && r.timestamp === room.timestamp)
+        ? prev.filter(r => !(r.room === room.room && r.timestamp === room.timestamp))
+        : [...prev, room]
+    );
+  };
+
+  if (isWaitingForMux) {
     return (
       <div className="flex flex-col items-center justify-center space-y-4 p-8">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <div className="relative">
+          <Video className="w-12 h-12 text-primary animate-pulse" />
+          <div className="absolute inset-0 w-12 h-12 bg-primary/20 rounded-full animate-ping" />
+        </div>
         <p className="text-center text-sm text-gray-600">
-          Analyzing your video to identify rooms...
-          <br />
-          This may take a minute
+          Sending video tour to AI{dots}
+        </p>
+      </div>
+    );
+  }
+
+  if (isAIWatching) {
+    return (
+      <div className="flex flex-col items-center justify-center space-y-4 p-8">
+        <div className="relative">
+          <Brain className="w-12 h-12 text-primary animate-pulse" />
+          <div className="absolute inset-0 w-12 h-12 bg-primary/20 rounded-full animate-ping" />
+        </div>
+        <p className="text-center text-sm text-gray-600">
+          AI is watching your video{dots}
         </p>
       </div>
     );
@@ -65,7 +119,7 @@ export function RoomAnalysis({ videoId: muxPlaybackId, onComplete, onSkip }: Roo
           <Button onClick={analyzeRooms} variant="outline">
             Try Again
           </Button>
-          <Button onClick={onSkip}>Skip Analysis</Button>
+          <Button onClick={onSkip}>Skip</Button>
         </div>
       </div>
     );
@@ -73,24 +127,52 @@ export function RoomAnalysis({ videoId: muxPlaybackId, onComplete, onSkip }: Roo
 
   if (rooms) {
     return (
-      <div className="space-y-4 p-4">
-        <div className="flex items-center justify-center space-x-2 mb-6">
-          <CheckCircle2 className="w-6 h-6 text-primary" />
-          <p className="text-sm font-medium">Room Analysis Complete</p>
+      <div className="space-y-6 p-4">
+        <div className="space-y-2">
+          <h3 className="font-medium">Identified Rooms</h3>
+          <p className="text-sm text-gray-500">Select the rooms you want to include in your tour.</p>
         </div>
         
-        <div className="grid gap-2">
-          {rooms.map((room, index) => (
-            <Card key={index} className="p-3 flex justify-between items-center">
-              <span className="font-medium">{room.room}</span>
-              <span className="text-sm text-gray-500">{room.timestamp}</span>
-            </Card>
-          ))}
+        <div className="flex flex-wrap gap-2">
+          {rooms.map((room, index) => {
+            const isSelected = selectedRooms.some(
+              r => r.room === room.room && r.timestamp === room.timestamp
+            );
+            return (
+              <button
+                key={index}
+                onClick={() => toggleRoom(room)}
+                className={cn(
+                  "group flex items-center gap-2 px-3 py-1.5 rounded-full text-sm transition-colors",
+                  isSelected
+                    ? "bg-slate-800 text-white hover:bg-slate-700"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                )}
+              >
+                <span>{room.room}</span>
+                <span className="text-xs opacity-60">{room.timestamp}</span>
+                <X className={cn(
+                  "w-4 h-4 transition-colors",
+                  isSelected
+                    ? "text-white/60 group-hover:text-white"
+                    : "text-gray-400 group-hover:text-gray-600"
+                )} />
+              </button>
+            );
+          })}
         </div>
 
-        <Button onClick={() => onComplete(rooms)} className="w-full mt-4">
-          Continue
-        </Button>
+        <div className="flex justify-between pt-4">
+          <Button onClick={onSkip} variant="outline">
+            Skip
+          </Button>
+          <Button 
+            onClick={() => onComplete(selectedRooms)}
+            disabled={selectedRooms.length === 0}
+          >
+            Continue
+          </Button>
+        </div>
       </div>
     );
   }
