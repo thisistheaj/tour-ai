@@ -19,8 +19,6 @@ async function waitForMuxVideo(muxPlaybackId: string, maxAttempts = 10): Promise
       const response = await fetch(muxUrl);
       
       if (!response.ok) {
-        console.log(response);
-        console.log(`Attempt ${attempt + 1}: Video not ready`);
         if (attempt === maxAttempts - 1) {
           throw new Error(`Failed to fetch video after ${maxAttempts} attempts`);
         }
@@ -76,7 +74,11 @@ export async function analyzeVideoRooms(muxPlaybackId: string): Promise<Room[]> 
         role: "user",
         parts: [
           {
-            text: "Analyze this apartment tour video and identify what rooms are shown and at what timestamps. Respond ONLY with a JSON array in this exact format, with no additional text or explanation: [{\"room\": \"Living Room\", \"timestamp\": \"0:00\"}, {\"room\": \"Kitchen\", \"timestamp\": \"1:23\"}]. For rooms that aren't clearly identifiable, use \"Room 1\", \"Room 2\", etc. Always label bathrooms as \"Bathroom\" and kitchens as \"Kitchen\"."
+            text: `Analyze this apartment tour video and identify what rooms are shown and at what timestamps.
+Respond ONLY with a JSON array in this exact format, with no additional text or explanation:
+[{"room": "Living Room", "timestamp": "0:00"}, {"room": "Kitchen", "timestamp": "1:23"}].
+For rooms that aren't clearly identifiable, use "Room 1", "Room 2", etc.
+Always label bathrooms as "Bathroom" and kitchens as "Kitchen".`
           }
         ],
       }
