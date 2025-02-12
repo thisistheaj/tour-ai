@@ -31,7 +31,10 @@ import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
 
 type ChatResponse = {
-  response?: string;
+  response?: {
+    message: string;
+    videoTimestamp?: string;
+  };
   error?: string;
   success?: boolean;
 };
@@ -122,13 +125,36 @@ export default function FeedPage() {
   const fetcher = useFetcher<ChatResponse>();
   const videoRefs = useRef<{ [key: string]: any }>({});
   const chatInputRef = useRef<HTMLInputElement>(null);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([{
-    text: "Hi! I'm your AI assistant. Ask me anything about this property and I'll help you out!",
-    isUser: false,
-    timestamp: Date.now()
-  }]);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const currentVideoIdRef = useRef<string | null>(null);
+  
+  // Initialize chat messages from localStorage or default
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(() => {
+    if (typeof window === 'undefined') return [{
+      text: "Hi! I'm your AI assistant. Ask me anything about this property and I'll help you out!",
+      isUser: false,
+      timestamp: Date.now()
+    }];
 
+    const videoId = videos[currentIndex]?.id;
+    currentVideoIdRef.current = videoId;
+    const savedMessages = localStorage.getItem(`chat-${videoId}`);
+    return savedMessages ? JSON.parse(savedMessages) : [{
+      text: "Hi! I'm your AI assistant. Ask me anything about this property and I'll help you out!",
+      isUser: false,
+      timestamp: Date.now()
+    }];
+  });
+
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    const videoId = videos[currentIndex]?.id;
+    // Only save if this is still the current video
+    if (videoId && videoId === currentVideoIdRef.current) {
+      localStorage.setItem(`chat-${videoId}`, JSON.stringify(chatMessages));
+    }
+  }, [chatMessages, videos, currentIndex]);
+
+  // Handle video changes
   useEffect(() => {
     // Stop all videos
     Object.values(videoRefs.current).forEach((player: any) => {
@@ -140,14 +166,42 @@ export default function FeedPage() {
     // Play current video
     const currentPlayer = videoRefs.current[videos[currentIndex]?.id];
     if (currentPlayer) {
-      currentPlayer.play();
+      // Ensure video is muted before attempting to play
+      currentPlayer.muted = true;
+      currentPlayer.play().catch(() => {
+        // If autoplay fails, we'll just let the user start playback manually
+        console.log("Autoplay prevented - waiting for user interaction");
+      });
     }
+
+    // Update current video ID before loading messages
+    const videoId = videos[currentIndex]?.id;
+    currentVideoIdRef.current = videoId;
+
+    // Load chat history for this video from localStorage or use default
+    const savedMessages = localStorage.getItem(`chat-${videoId}`);
+    setChatMessages(savedMessages ? JSON.parse(savedMessages) : [{
+      text: "Hi! I'm your AI assistant. Ask me anything about this property and I'll help you out!",
+      isUser: false,
+      timestamp: Date.now()
+    }]);
   }, [currentIndex, videos]);
 
-  // Scroll to bottom of chat when messages change
+  // Initial video autoplay
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [chatMessages]);
+    const currentPlayer = videoRefs.current[videos[currentIndex]?.id];
+    if (currentPlayer) {
+      // Ensure video is muted before attempting to play
+      currentPlayer.muted = true;
+      // Small delay to ensure player is ready
+      setTimeout(() => {
+        currentPlayer.play().catch(() => {
+          // If autoplay fails, we'll just let the user start playback manually
+          console.log("Autoplay prevented - waiting for user interaction");
+        });
+      }, 100);
+    }
+  }, []); // Only run once on mount
 
   const handleSave = (videoId: string, currentlySaved: boolean) => {
     fetcher.submit(
@@ -241,17 +295,32 @@ export default function FeedPage() {
         setChatMessages(prev => {
           // Check if this response is already in the chat
           const isDuplicate = prev.some(msg => 
-            !msg.isUser && msg.text === response && 
+            !msg.isUser && msg.text === response.message && 
             Date.now() - msg.timestamp < 1000
           );
           if (isDuplicate) return prev;
           
           return [...prev, {
-            text: response,
+            text: response.message,
             isUser: false,
             timestamp: Date.now()
           } satisfies ChatMessage];
         });
+
+        // If there's a video timestamp, seek to it and close chat
+        if (response.videoTimestamp) {
+          const currentPlayer = videoRefs.current[videos[currentIndex]?.id];
+          if (currentPlayer) {
+            // Convert timestamp (e.g. "1:30") to seconds
+            const [minutes, seconds] = response.videoTimestamp.split(":").map(Number);
+            const timeInSeconds = (minutes * 60) + (seconds || 0);
+            currentPlayer.currentTime = timeInSeconds;
+            // Ensure video is playing
+            currentPlayer.play().catch(console.error);
+            // Only close chat when there's a timestamp
+            setTimeout(() => setShowChat(false), 1000);
+          }
+        }
       } else if (fetcher.data.error) {
         setChatMessages(prev => [...prev, {
           text: "Sorry, I had trouble processing your question. Please try again.",
@@ -372,6 +441,7 @@ export default function FeedPage() {
                   metadata-video-title={video.title}
                   stream-type="on-demand"
                   autoplay={false}
+                  muted={true}
                   preload="auto"
                   loop={true}
                   defaultHidden={true}
@@ -689,7 +759,6 @@ export default function FeedPage() {
                           <p>{message.text}</p>
                         </div>
                       ))}
-                      <div ref={messagesEndRef} />
                     </div>
                   </div>
 

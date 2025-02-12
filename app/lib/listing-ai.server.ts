@@ -13,11 +13,16 @@ export interface ChatMessage {
   timestamp: number;
 }
 
+export interface AIResponse {
+  message: string;
+  videoTimestamp?: string;
+}
+
 export async function getListingResponse(
   question: string,
   listing: Video & { tags?: string[] },
   chatHistory: ChatMessage[] = []
-): Promise<string> {
+): Promise<AIResponse> {
   const model = genAI.getGenerativeModel({
     model: "gemini-pro",
     generationConfig: {
@@ -44,6 +49,17 @@ Video Tour Analysis:
 - Features & Amenities: ${listing.tags?.join(", ") || "None specified"}
 
 Note: The rooms and features listed above were identified through AI analysis of the video tour, so I can help answer specific questions about what's shown in the video.
+
+Special Instructions:
+If a user asks to see a specific room or feature shown in the video, respond with a JSON object in this format:
+{
+  "message": "Your helpful response about the room/feature",
+  "videoTimestamp": "timestamp from the rooms data where that room/feature is shown"
+}
+Otherwise, just respond with a JSON object containing only the message:
+{
+  "message": "Your helpful response"
+}
 `.trim();
 
   // Format chat history
@@ -64,7 +80,7 @@ Note: The rooms and features listed above were identified through AI analysis of
       {
         role: "model",
         parts: [{
-          text: "I'm here to help you learn about this property. I'll answer your questions based on the listing information provided. I'll be direct, helpful, and honest about what I know and don't know."
+          text: "I'm here to help you learn about this property. I'll answer your questions based on the listing information provided. I'll be direct, helpful, and honest about what I know and don't know. When you ask to see specific rooms or features, I'll point you to the right timestamp in the video tour."
         }]
       },
       ...formattedHistory
@@ -74,7 +90,20 @@ Note: The rooms and features listed above were identified through AI analysis of
   try {
     const result = await chat.sendMessage(question);
     const response = result.response.text();
-    return response;
+    
+    try {
+      // Try to parse as JSON first
+      const parsedResponse = JSON.parse(response);
+      return {
+        message: parsedResponse.message,
+        videoTimestamp: parsedResponse.videoTimestamp
+      };
+    } catch {
+      // If not JSON, return as regular message
+      return {
+        message: response
+      };
+    }
   } catch (error) {
     console.error("Error getting AI response:", error);
     throw new Error("Failed to get response from AI assistant");
