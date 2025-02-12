@@ -1,110 +1,65 @@
-# Field Recognition & Auto-Tagging Implementation
+# AI Chat Interface for Listings
 
-## Principles ✅
-- [x] Minimal Changes: Reuse existing structures when possible
-- [x] Direct Solutions: What's the smallest set of changes needed?
-- [x] Progressive Enhancement: Build on what works (room detection)
-- [x] User First: Always provide manual override options
+## Principles
+- Keep it simple - just Q&A between renter and AI
+- Reuse existing UI patterns from feed
+- Store chat history in browser (localStorage)
+- Focus on helpful, contextual responses
 
-## What We're Detecting
-
-### Core Fields (Auto-Fill Step 3) ✅
-- [x] Bedrooms (count)
-- [x] Bathrooms (count)
-
-### Tags (Search/Filter) ✅
-Simple array of strings for amenities, features, and styles like:
-- [x] "washer/dryer"
-- [x] "hardwood floors"
-- [x] "modern"
-- [x] "high ceilings"
-- [x] "stainless appliances"
-
-### NOT Detecting ✅
-- [x] Address (Google Places API)
-- [x] City (Account settings)
-- [x] Description (Separate AI task)
-- [x] Property type
-- [x] Square footage
+## What We're Building
+- Chat bubble UI in listing feed
+- AI responses based on listing data
+- Per-user, per-listing chat history
+- Basic text Q&A only
 
 ## Implementation Sequence
 
-### Phase 1: Schema Update ✅
-- [x] Add migration for tags column:
-  ```sql
-  ALTER TABLE "Video" ADD COLUMN "tags" TEXT[];
-  ```
+### Phase 1: Chat UI Shell
+- [ ] Add chat bubble trigger in listing actions
+- [ ] Create slide-up chat panel (similar to description panel)
+- [ ] Add message input and history display
+- [ ] Style with existing feed UI patterns
+- [ ] Add loading states
+- [ ] Test UI interactions with mock data
 
-### Phase 2: Prompt Engineering ✅
-- [x] Update Gemini prompt to detect fields and tags:
+### Phase 2: E2E AI Integration
+- [ ] Create listing-ai.server.ts for LLM wrapper:
   ```typescript
-  {
-    "rooms": [
-      { "room": "Living Room", "timestamp": "0:00" }
-    ],
-    "propertyInfo": {
-      "bedrooms": 2,
-      "bathrooms": 1.5
-    },
-    "tags": [
-      "washer/dryer",
-      "hardwood floors",
-      "modern kitchen",
-      "stainless appliances"
-    ]
+  async function getListingResponse(
+    question: string,
+    listing: Video,
+    chatHistory: ChatMessage[]
+  ): Promise<string>
+  ```
+- [ ] Format listing data as context
+- [ ] Add temperature/prompt tuning
+- [ ] Add "chat" action to feed handler
+- [ ] Wire up UI to send/receive messages
+- [ ] Add error handling
+- [ ] Test with real questions
+
+### Phase 3: State Management
+- [ ] Add chat state to feed:
+  ```typescript
+  interface ChatMessage {
+    text: string;
+    isUser: boolean;
+    timestamp: number;
   }
   ```
-- [x] Test prompt with sample videos
-- [x] Tune temperature/params if needed
-- [x] Handle partial/missing detections gracefully
+- [ ] Store history in localStorage by `${userId}-${videoId}`
+- [ ] Load history on chat open
+- [ ] Clear history functionality
+- [ ] Test state persistence
 
-### Phase 3: Type Updates ✅
-- [x] Update VideoAnalysis type:
-  ```typescript
-  type VideoAnalysis = {
-    rooms: Room[];
-    propertyInfo: {
-      bedrooms?: number;
-      bathrooms?: number;
-    };
-    tags: string[];
-  };
-  ```
+## Success Criteria
+- [ ] UI feels integrated with feed
+- [ ] Responses feel natural and helpful
+- [ ] Fast response times (<2s)
+- [ ] Graceful error handling
+- [ ] Chat history persists across refreshes
 
-### Phase 4: Server Updates ✅
-- [x] Update analyzeVideo function to return new format
-- [x] Add validation for fields and tags
-- [x] Update API endpoint to handle new response format
-
-### Phase 5: UI Updates ✅
-- [x] Extend RoomAnalysis component:
-  - [x] Show detected rooms (existing)
-  - [x] Show detected bedrooms/bathrooms
-  - [x] Show detected tags
-  - [x] Add edit/override controls
-- [x] Pre-fill form fields in Step 3:
-  - [x] Bedrooms count
-  - [x] Bathrooms count
-- [x] Add tag management UI
-- [x] Style with shadcn
-
-### Phase 6: Testing 🚧
-- [ ] Test field detection:
-  - [ ] Bedrooms/bathrooms count
-  - [ ] Missing/partial detections
-- [ ] Test tag detection:
-  - [ ] Common amenities
-  - [ ] Various video types
-- [ ] Test edge cases:
-  - [ ] Poor video quality
-  - [ ] Unusual layouts
-  - [ ] Empty responses
-- [ ] Performance testing
-
-## Success Criteria 🚧
-- [ ] Field detection accuracy:
-  - [ ] Bedrooms/bathrooms: 95%
-  - [ ] Tags: 85%
-- [ ] Analysis completes in <45s
-- [ ] Clean UI/UX for overrides
-- [ ] No regression in existing features 
+## Testing Notes
+- After Phase 1: Test UI flow with mock data
+- After Phase 2: Test real AI responses
+- After Phase 3: Test history persistence 

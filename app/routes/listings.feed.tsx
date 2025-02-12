@@ -20,9 +20,13 @@ import {
   CheckCircle2,
   XCircle,
   ChevronUpIcon,
-  Mail
+  Mail,
+  MessageCircle,
+  Send
 } from "lucide-react";
 import { Link } from "@remix-run/react";
+import { Input } from "~/components/ui/input";
+import { Button } from "~/components/ui/button";
 
 export const loader = async ({ request }: { request: Request }) => {
   const user = await requireUser(request);
@@ -78,11 +82,13 @@ export default function FeedPage() {
   const { videos, savedStates, userId, userType } = useLoaderData<typeof loader>();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const [showChat, setShowChat] = useState(false);
   const [lastTap, setLastTap] = useState({ time: 0, x: 0, y: 0 });
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
   const [heartPosition, setHeartPosition] = useState({ x: 0, y: 0 });
   const fetcher = useFetcher();
   const videoRefs = useRef<{ [key: string]: any }>({});
+  const chatInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // Stop all videos
@@ -171,7 +177,7 @@ export default function FeedPage() {
       <div className="absolute top-4 left-4 right-4 z-50 flex justify-between items-center">
         <div className="w-[88px]">
           <AnimatePresence>
-            {!showFullDescription && (
+            {!showFullDescription && !showChat && (
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -198,13 +204,23 @@ export default function FeedPage() {
             )}
           </AnimatePresence>
         </div>
-        <Link 
-          to="/listings/saved" 
-          className="text-white flex items-center gap-2 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full transition-colors"
-        >
-          <Heart className="w-4 h-4" />
-          <span className="text-sm">Saved</span>
-        </Link>
+        <AnimatePresence>
+          {!showFullDescription && !showChat && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <Link 
+                to="/listings/saved" 
+                className="text-white flex items-center gap-2 bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full transition-colors"
+              >
+                <Heart className="w-4 h-4" />
+                <span className="text-sm">Saved</span>
+              </Link>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <AnimatePresence initial={false}>
@@ -418,7 +434,7 @@ export default function FeedPage() {
 
               {/* Side Actions */}
               <AnimatePresence>
-                {!showFullDescription && (
+                {!showFullDescription && !showChat && (
                   <motion.div 
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -500,10 +516,90 @@ export default function FeedPage() {
                       </div>
                       <span className="text-white text-xs">Share</span>
                     </button>
+
+                    <button 
+                      onClick={() => setShowChat(true)}
+                      className="group flex flex-col items-center gap-1"
+                    >
+                      <div className="p-3 rounded-full bg-white/10 text-white 
+                        group-hover:bg-white/20 transition-colors">
+                        <MessageCircle className="w-6 h-6" />
+                      </div>
+                      <span className="text-white text-xs">Chat</span>
+                    </button>
                   </motion.div>
                 )}
               </AnimatePresence>
             </div>
+
+            {/* Chat Panel */}
+            <AnimatePresence>
+              {showChat && (
+                <motion.div
+                  initial={{ opacity: 0, y: "100%" }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: "100%" }}
+                  transition={{ 
+                    type: "spring", 
+                    damping: 30,
+                    stiffness: 150,
+                    mass: 1.2,
+                    duration: 0.5
+                  }}
+                  className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+                >
+                  {/* Chat Header */}
+                  <div className="absolute top-0 left-0 right-0 p-4 bg-gradient-to-b from-black to-transparent">
+                    <div className="flex items-center justify-between">
+                      <button 
+                        onClick={() => setShowChat(false)}
+                        className="text-white"
+                      >
+                        <ArrowLeft className="w-6 h-6" />
+                      </button>
+                      <h2 className="text-white font-medium">Ask about this property</h2>
+                      <div className="w-6" /> {/* Spacer for alignment */}
+                    </div>
+                  </div>
+
+                  {/* Chat Messages */}
+                  <div className="absolute inset-0 mt-16 mb-20 overflow-y-auto p-4">
+                    <div className="flex flex-col gap-4">
+                      {/* Welcome Message */}
+                      <div className="bg-white/25 text-white rounded-lg p-4 max-w-[85%]">
+                        <p>Hi! I'm your AI assistant. Ask me anything about this property and I'll help you out!</p>
+                      </div>
+
+                      {/* Mock Messages (to be replaced with real chat) */}
+                      <div className="bg-white/10 text-white rounded-lg p-4 self-end max-w-[85%]">
+                        <p>What's included in the rent?</p>
+                      </div>
+                      <div className="bg-white/25 text-white rounded-lg p-4 max-w-[85%]">
+                        <p>Based on the listing, the monthly rent of ${video.price} includes...</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Chat Input */}
+                  <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black to-transparent">
+                    <form className="flex gap-2" onSubmit={(e) => {
+                      e.preventDefault();
+                      // TODO: Handle message submission
+                    }}>
+                      <Input
+                        ref={chatInputRef}
+                        type="text"
+                        placeholder="Ask a question..."
+                        className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                      />
+                      <Button type="submit" size="icon" variant="secondary">
+                        <Send className="w-4 h-4" />
+                      </Button>
+                    </form>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         ))}
       </AnimatePresence>
