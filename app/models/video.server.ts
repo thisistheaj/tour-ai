@@ -36,6 +36,7 @@ interface CreateVideoInput {
   available?: boolean;
   rooms?: any;
   tags?: string[];
+  videoDescription?: string;
   propertyInfo?: {
     bedrooms?: number;
     bathrooms?: number;

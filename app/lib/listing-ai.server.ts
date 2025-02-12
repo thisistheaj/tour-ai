@@ -7,7 +7,7 @@ if (!process.env.GEMINI_API_KEY) {
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-export interface ChatMessage {
+export type ChatMessage = {
   text: string;
   isUser: boolean;
   timestamp: number;
@@ -20,7 +20,7 @@ export interface AIResponse {
 
 export async function getListingResponse(
   question: string,
-  listing: Video & { tags?: string[] },
+  listing: Video,
   chatHistory: ChatMessage[] = []
 ): Promise<AIResponse> {
   const model = genAI.getGenerativeModel({
@@ -47,8 +47,9 @@ Property Details:
 Video Tour Analysis:
 - Rooms Shown: ${listing.rooms ? JSON.stringify(listing.rooms, null, 2) : "No room data available"}
 - Features & Amenities: ${listing.tags?.join(", ") || "None specified"}
+- Video Walkthrough: ${listing.videoDescription || "No detailed walkthrough available"}
 
-Note: The rooms and features listed above were identified through AI analysis of the video tour, so I can help answer specific questions about what's shown in the video.
+Note: The rooms, features, and walkthrough description above were identified through AI analysis of the video tour, so I can help answer specific questions about what's shown in the video.
 
 Special Instructions:
 If a user asks to see a specific room or feature shown in the video, respond with a JSON object in this format:

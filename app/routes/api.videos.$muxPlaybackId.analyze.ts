@@ -18,12 +18,20 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
 
   try {
     const analysis = await analyzeVideo(muxPlaybackId);
+    console.log("\n=== API: Video Analysis Results ===");
+    console.log("Video Description:", analysis.videoDescription);
+    console.log("Analysis:", {
+      rooms: analysis.rooms.length,
+      tags: analysis.tags.length,
+      hasDescription: !!analysis.videoDescription
+    });
 
     return json({ 
       success: true, 
       rooms: analysis.rooms,
       propertyInfo: analysis.propertyInfo,
-      tags: analysis.tags
+      tags: analysis.tags,
+      videoDescription: analysis.videoDescription
     });
   } catch (error) {
     console.error("Error analyzing rooms:", error);

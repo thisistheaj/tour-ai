@@ -34,7 +34,13 @@ interface FormFields {
   bathrooms?: string;
   description?: string;
   available?: string;
-  [key: string]: string | undefined;
+  rooms?: Room[];
+  tags?: string[];
+  videoDescription?: string;
+  propertyInfo?: {
+    bedrooms?: number;
+    bathrooms?: number;
+  };
 }
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -99,6 +105,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     const rooms = JSON.parse(formData.get("rooms") as string);
     const tags = JSON.parse(formData.get("tags") as string);
     const propertyInfo = JSON.parse(formData.get("propertyInfo") as string);
+    const videoDescription = formData.get("videoDescription") as string;
+
+    console.log("\n=== Action: Final Form Submission ===");
+    console.log("Video Description:", videoDescription);
 
     if (!title || !assetId || !playbackId || !price || !address || !city || !bedrooms || !bathrooms || !description) {
       return json(
@@ -108,7 +118,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     }
 
     try {
-      await createVideo({
+      const video = await createVideo({
         title,
         userId,
         muxAssetId: assetId,
@@ -122,8 +132,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         description,
         available,
         rooms,
-        tags
+        tags,
+        videoDescription
       });
+
+      console.log("\n=== Action: Video Created ===");
+      console.log("Video Description saved:", video.videoDescription);
 
       return redirect("/manager");
     } catch (error) {
@@ -199,10 +213,16 @@ export default function NewListing() {
     
     if (step === 3) {
       // Store form data and move to confirmation step
+      console.log("\n=== NewListing: Step 3 Form Data ===");
+      console.log("Video Description:", formDataObj.videoDescription);
       setFormData(formDataObj);
       setStep(4);
     } else if (step === 4) {
       // Final submission - include analysis data
+      console.log("\n=== NewListing: Final Submission ===");
+      console.log("Form Data Video Description:", formData?.videoDescription);
+      console.log("Analyzed Rooms Video Description:", analyzedRooms?.videoDescription);
+
       const form = document.createElement('form');
       form.method = 'post';
       
@@ -238,6 +258,12 @@ export default function NewListing() {
         propertyInfoInput.name = 'propertyInfo';
         propertyInfoInput.value = JSON.stringify(analyzedRooms.propertyInfo);
         form.appendChild(propertyInfoInput);
+
+        const videoDescriptionInput = document.createElement('input');
+        videoDescriptionInput.type = 'hidden';
+        videoDescriptionInput.name = 'videoDescription';
+        videoDescriptionInput.value = analyzedRooms.videoDescription || '';
+        form.appendChild(videoDescriptionInput);
       }
       
       document.body.appendChild(form);
@@ -252,6 +278,29 @@ export default function NewListing() {
   const handleAddressSelect = (address: string, city: string) => {
     setSelectedAddress(address);
     setSelectedCity(city.toLowerCase());
+  };
+
+  const handleAnalysisComplete = (analysis: VideoAnalysis) => {
+    console.log("\n=== NewListing: Received Analysis ===");
+    console.log("Video Description:", analysis.videoDescription);
+
+    setAnalyzedRooms(analysis);
+    setFormData(prev => {
+      const newFormData = {
+        ...prev || {},
+        rooms: analysis.rooms,
+        tags: analysis.tags,
+        videoDescription: analysis.videoDescription,
+        propertyInfo: analysis.propertyInfo,
+        // Pre-fill bedrooms and bathrooms if detected
+        bedrooms: analysis.propertyInfo.bedrooms?.toString() || "",
+        bathrooms: analysis.propertyInfo.bathrooms?.toString() || ""
+      };
+      console.log("\n=== NewListing: Updated Form Data ===");
+      console.log("Video Description in form:", newFormData.videoDescription);
+      return newFormData;
+    });
+    setStep(3);
   };
 
   return (
@@ -298,11 +347,19 @@ export default function NewListing() {
                     endpoint={uploadUrl}
                     onUploadStart={() => setIsUploading(true)}
                     onSuccess={() => setIsUploading(false)}
+                    onError={(event: any) => {
+                      if (event.detail?.message?.includes('File size')) {
+                        setIsUploading(false);
+                        alert('Video file must be under 20MB');
+                      }
+                    }}
                     capture="environment"
                     aspect-ratio="9:16"
                     preferred-camera-facing-mode="user"
+                    max-size-bytes={20 * 1024 * 1024} // 20MB in bytes
                   />
                 </div>
+                <p className="text-xs text-gray-500 mt-1">Maximum file size: 20MB</p>
               </div>
             )}
 
@@ -311,18 +368,7 @@ export default function NewListing() {
             ) : step === 2 ? (
               <RoomAnalysis
                 videoId={videoData?.playbackId || ""}
-                onComplete={(analysis) => {
-                  setAnalyzedRooms(analysis);
-                  // Pre-fill bedrooms and bathrooms if detected
-                  if (analysis.propertyInfo.bedrooms || analysis.propertyInfo.bathrooms) {
-                    setFormData(prev => ({
-                      ...prev,
-                      bedrooms: analysis.propertyInfo.bedrooms?.toString() || "",
-                      bathrooms: analysis.propertyInfo.bathrooms?.toString() || ""
-                    }));
-                  }
-                  setStep(3);
-                }}
+                onComplete={handleAnalysisComplete}
                 onSkip={() => setStep(3)}
               />
             ) : step === 3 ? (

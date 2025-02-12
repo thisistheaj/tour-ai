@@ -64,6 +64,7 @@ model Video {
   bedrooms      Int?
   bathrooms     Int?
   description   String?  @db.Text
+  videoDescription String? @db.Text
   available     Boolean  @default(true)
   tags          String[] @default([])
 

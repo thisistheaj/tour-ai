@@ -18,12 +18,13 @@ export type VideoAnalysis = {
     bathrooms?: number;
   };
   tags: string[];
+  videoDescription: string;
 };
 
 export async function isMuxVideoReady(muxPlaybackId: string, maxAttempts = 100): Promise<boolean> {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
-      const muxUrl = `https://stream.mux.com/${muxPlaybackId}/capped-1080p.mp4?download=true`;
+      const muxUrl = `https://stream.mux.com/${muxPlaybackId}/low.mp4?download=true`;
       const response = await fetch(muxUrl);
       if (!response.ok) {
         if (attempt === maxAttempts - 1) {
@@ -47,7 +48,7 @@ export async function isMuxVideoReady(muxPlaybackId: string, maxAttempts = 100):
 export async function getMuxVideo(muxPlaybackId: string, maxAttempts = 10): Promise<ArrayBuffer> {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
-      const muxUrl = `https://stream.mux.com/${muxPlaybackId}/capped-1080p.mp4?download=true`;
+      const muxUrl = `https://stream.mux.com/${muxPlaybackId}/low.mp4?download=true`;
       const response = await fetch(muxUrl);
       
       if (!response.ok) {
@@ -110,6 +111,7 @@ export async function analyzeVideo(muxPlaybackId: string): Promise<VideoAnalysis
 1. What rooms are shown and at what timestamps
 2. The number of bedrooms and bathrooms
 3. Notable features, amenities, and style elements
+4. Write a detailed description of everything shown in the video walkthrough, focusing on what a prospective renter would want to know about
 
 Respond ONLY with a JSON object in this exact format, with no additional text or explanation:
 
@@ -129,7 +131,8 @@ Respond ONLY with a JSON object in this exact format, with no additional text or
     "hardwood floors",
     "modern kitchen",
     "stainless appliances"
-  ]
+  ],
+  "videoDescription": "A detailed walkthrough description of the property..."
 }
 
 Notes:
@@ -137,7 +140,8 @@ Notes:
 - Always label bathrooms as "Bathroom" and kitchens as "Kitchen"
 - If you can't determine bedrooms or bathrooms count, omit those fields
 - Include any notable features, amenities, or style elements as tags
-- Keep tags simple and descriptive`
+- Keep tags simple and descriptive
+- Make the video description detailed but concise, focusing on layout, flow, features, and overall condition`
           }
         ],
       }
@@ -178,11 +182,15 @@ Notes:
       ? analysis.tags.filter(tag => typeof tag === 'string')
       : [];
 
+    // Ensure videoDescription exists
+    analysis.videoDescription = analysis.videoDescription || "No video description available";
+
     console.log("\nFinal Analysis Result:");
     console.log(JSON.stringify({
       rooms: analysis.rooms.length,
       propertyInfo: analysis.propertyInfo,
-      tags: analysis.tags.length
+      tags: analysis.tags.length,
+      hasDescription: !!analysis.videoDescription
     }, null, 2));
 
     return analysis;
@@ -192,7 +200,8 @@ Notes:
     const fallback = {
       rooms: [{ room: "Room 1", timestamp: "0:00" }],
       propertyInfo: {},
-      tags: []
+      tags: [],
+      videoDescription: "Video analysis not available"
     };
     console.log("Returning fallback:", fallback);
     return fallback;

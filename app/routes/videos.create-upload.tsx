@@ -13,8 +13,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const upload = await mux.video.uploads.create({
     new_asset_settings: {
       playback_policy: ["public"],
-      encoding_tier: "baseline",
-      mp4_support: "capped-1080p",
+      mp4_support: "standard",
+      video_quality: "plus",
     },
     cors_origin: "*",
   });

@@ -59,10 +59,26 @@ export function RoomAnalysis({ videoId: muxPlaybackId, onComplete, onSkip }: Roo
         throw new Error(data.error);
       }
 
+      console.log("\n=== Room Analysis Component: Received Data ===");
+      console.log("Video Description from API:", data.videoDescription);
+
       setAnalysis(data);
       setSelectedRooms(data.rooms);
       setSelectedTags(data.tags);
       setIsAIWatching(false);
+      
+      // Pass complete analysis to parent
+      const completeAnalysis = {
+        rooms: data.rooms,
+        propertyInfo: data.propertyInfo || { bedrooms: undefined, bathrooms: undefined },
+        tags: data.tags,
+        videoDescription: data.videoDescription || "No detailed walkthrough available"
+      };
+
+      console.log("\n=== Room Analysis Component: Passing to Parent ===");
+      console.log("Video Description being passed:", completeAnalysis.videoDescription);
+
+      onComplete(completeAnalysis);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to identify rooms");
       setIsWaitingForMux(false);
@@ -231,7 +247,8 @@ export function RoomAnalysis({ videoId: muxPlaybackId, onComplete, onSkip }: Roo
             onClick={() => onComplete({
               rooms: selectedRooms,
               propertyInfo: analysis.propertyInfo,
-              tags: selectedTags
+              tags: selectedTags,
+              videoDescription: analysis.videoDescription || "No detailed walkthrough available"
             })}
             disabled={selectedRooms.length === 0}
           >
