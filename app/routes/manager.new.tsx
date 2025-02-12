@@ -122,8 +122,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         description,
         available,
         rooms,
-        tags,
-        propertyInfo
+        tags
       });
 
       return redirect("/manager");
