@@ -7,6 +7,8 @@ import { prisma } from "~/db.server";
 import { requireUser } from "~/session.server";
 import { isListingSaved, saveListing, unsaveListing } from "~/models/video.server";
 import type { Video } from "@prisma/client";
+import { getListingResponse } from "~/lib/listing-ai.server";
+import type { ChatMessage } from "~/lib/listing-ai.server";
 import {
   Heart,
   Share2,
@@ -27,6 +29,12 @@ import {
 import { Link } from "@remix-run/react";
 import { Input } from "~/components/ui/input";
 import { Button } from "~/components/ui/button";
+
+type ChatResponse = {
+  response?: string;
+  error?: string;
+  success?: boolean;
+};
 
 export const loader = async ({ request }: { request: Request }) => {
   const user = await requireUser(request);
@@ -73,6 +81,30 @@ export async function action({ request }: ActionFunctionArgs) {
   } else if (action === "unsave") {
     await unsaveListing(user.id, videoId);
     return json({ saved: false });
+  } else if (action === "chat") {
+    const question = formData.get("question");
+    if (!question || typeof question !== "string") {
+      return json({ error: "Question is required" }, { status: 400 });
+    }
+
+    const chatHistory = formData.get("chatHistory");
+    const parsedHistory: ChatMessage[] = chatHistory ? JSON.parse(chatHistory as string) : [];
+
+    try {
+      const video = await prisma.video.findUnique({
+        where: { id: videoId }
+      });
+
+      if (!video) {
+        return json({ error: "Video not found" }, { status: 404 });
+      }
+
+      const response = await getListingResponse(question, video, parsedHistory);
+      return json({ success: true, response });
+    } catch (error) {
+      console.error("Error getting AI response:", error);
+      return json({ error: "Failed to get AI response" }, { status: 500 });
+    }
   }
 
   return json({ error: "Invalid action" }, { status: 400 });
@@ -83,12 +115,19 @@ export default function FeedPage() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [isAiResponding, setIsAiResponding] = useState(false);
   const [lastTap, setLastTap] = useState({ time: 0, x: 0, y: 0 });
   const [showHeartAnimation, setShowHeartAnimation] = useState(false);
   const [heartPosition, setHeartPosition] = useState({ x: 0, y: 0 });
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<ChatResponse>();
   const videoRefs = useRef<{ [key: string]: any }>({});
   const chatInputRef = useRef<HTMLInputElement>(null);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([{
+    text: "Hi! I'm your AI assistant. Ask me anything about this property and I'll help you out!",
+    isUser: false,
+    timestamp: Date.now()
+  }]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Stop all videos
@@ -104,6 +143,11 @@ export default function FeedPage() {
       currentPlayer.play();
     }
   }, [currentIndex, videos]);
+
+  // Scroll to bottom of chat when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMessages]);
 
   const handleSave = (videoId: string, currentlySaved: boolean) => {
     fetcher.submit(
@@ -150,6 +194,74 @@ export default function FeedPage() {
     
     setLastTap({ time: currentTime, x: tapPosition.x, y: tapPosition.y });
   };
+
+  const handleChatSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const input = form.querySelector('input');
+    if (!input?.value.trim()) return;
+
+    const question = input.value.trim();
+    input.value = '';
+
+    // Add user message
+    const userMessage: ChatMessage = {
+      text: question,
+      isUser: true,
+      timestamp: Date.now()
+    };
+    setChatMessages(prev => [...prev, userMessage]);
+    setIsAiResponding(true);
+
+    try {
+      await fetcher.submit(
+        {
+          videoId: videos[currentIndex].id,
+          action: "chat",
+          question,
+          chatHistory: JSON.stringify(chatMessages)
+        },
+        { method: "post" }
+      );
+    } catch (error) {
+      console.error("Error sending message:", error);
+      setChatMessages(prev => [...prev, {
+        text: "Sorry, something went wrong. Please try again.",
+        isUser: false,
+        timestamp: Date.now()
+      } satisfies ChatMessage]);
+    }
+  };
+
+  // Handle fetcher state changes
+  useEffect(() => {
+    if (fetcher.data && fetcher.state === "idle") {
+      if (fetcher.data.response) {
+        const response = fetcher.data.response;
+        setChatMessages(prev => {
+          // Check if this response is already in the chat
+          const isDuplicate = prev.some(msg => 
+            !msg.isUser && msg.text === response && 
+            Date.now() - msg.timestamp < 1000
+          );
+          if (isDuplicate) return prev;
+          
+          return [...prev, {
+            text: response,
+            isUser: false,
+            timestamp: Date.now()
+          } satisfies ChatMessage];
+        });
+      } else if (fetcher.data.error) {
+        setChatMessages(prev => [...prev, {
+          text: "Sorry, I had trouble processing your question. Please try again.",
+          isUser: false,
+          timestamp: Date.now()
+        } satisfies ChatMessage]);
+      }
+      setIsAiResponding(false);
+    }
+  }, [fetcher.data, fetcher.state]);
 
   return (
     <div className="fixed inset-0 bg-black">
@@ -565,34 +677,33 @@ export default function FeedPage() {
                   {/* Chat Messages */}
                   <div className="absolute inset-0 mt-16 mb-20 overflow-y-auto p-4">
                     <div className="flex flex-col gap-4">
-                      {/* Welcome Message */}
-                      <div className="bg-white/25 text-white rounded-lg p-4 max-w-[85%]">
-                        <p>Hi! I'm your AI assistant. Ask me anything about this property and I'll help you out!</p>
-                      </div>
-
-                      {/* Mock Messages (to be replaced with real chat) */}
-                      <div className="bg-white/10 text-white rounded-lg p-4 self-end max-w-[85%]">
-                        <p>What's included in the rent?</p>
-                      </div>
-                      <div className="bg-white/25 text-white rounded-lg p-4 max-w-[85%]">
-                        <p>Based on the listing, the monthly rent of ${video.price} includes...</p>
-                      </div>
+                      {chatMessages.map((message, index) => (
+                        <div
+                          key={message.timestamp}
+                          className={`${
+                            message.isUser 
+                              ? "bg-white/10 self-end" 
+                              : "bg-white/25"
+                          } text-white rounded-lg p-4 max-w-[85%]`}
+                        >
+                          <p>{message.text}</p>
+                        </div>
+                      ))}
+                      <div ref={messagesEndRef} />
                     </div>
                   </div>
 
                   {/* Chat Input */}
                   <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black to-transparent">
-                    <form className="flex gap-2" onSubmit={(e) => {
-                      e.preventDefault();
-                      // TODO: Handle message submission
-                    }}>
+                    <form className="flex gap-2" onSubmit={handleChatSubmit}>
                       <Input
                         ref={chatInputRef}
                         type="text"
-                        placeholder="Ask a question..."
+                        placeholder={isAiResponding ? "AI is typing..." : "Ask a question..."}
                         className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-white/60"
+                        disabled={isAiResponding}
                       />
-                      <Button type="submit" size="icon" variant="secondary">
+                      <Button type="submit" size="icon" variant="secondary" disabled={isAiResponding}>
                         <Send className="w-4 h-4" />
                       </Button>
                     </form>
