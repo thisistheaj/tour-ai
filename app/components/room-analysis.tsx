@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { Room } from "~/lib/gemini.server";
+import type { Room, VideoAnalysis } from "~/lib/gemini.server";
 import { Button } from "~/components/ui/button";
-import { Brain, Video, X, XCircle } from "lucide-react";
+import { Brain, Video, X, XCircle, Bed, Bath, Tag } from "lucide-react";
 import { cn } from "~/lib/utils";
 
 function useAnimatedEllipsis() {
@@ -19,7 +19,7 @@ function useAnimatedEllipsis() {
 
 interface RoomAnalysisProps {
   videoId: string;  // This is muxPlaybackId
-  onComplete: (rooms: Room[]) => void;
+  onComplete: (analysis: VideoAnalysis) => void;
   onSkip: () => void;
 }
 
@@ -27,8 +27,9 @@ export function RoomAnalysis({ videoId: muxPlaybackId, onComplete, onSkip }: Roo
   const [isWaitingForMux, setIsWaitingForMux] = useState(true);
   const [isAIWatching, setIsAIWatching] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [rooms, setRooms] = useState<Room[] | null>(null);
+  const [analysis, setAnalysis] = useState<VideoAnalysis | null>(null);
   const [selectedRooms, setSelectedRooms] = useState<Room[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const dots = useAnimatedEllipsis();
 
   const analyzeRooms = async () => {
@@ -52,16 +53,15 @@ export function RoomAnalysis({ videoId: muxPlaybackId, onComplete, onSkip }: Roo
         method: "GET",
       });
 
-
-
       const data = await response.json();
       
       if (data.error) {
         throw new Error(data.error);
       }
 
-      setRooms(data.rooms);
+      setAnalysis(data);
       setSelectedRooms(data.rooms);
+      setSelectedTags(data.tags);
       setIsAIWatching(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to identify rooms");
@@ -79,6 +79,14 @@ export function RoomAnalysis({ videoId: muxPlaybackId, onComplete, onSkip }: Roo
       prev.find(r => r.room === room.room && r.timestamp === room.timestamp)
         ? prev.filter(r => !(r.room === room.room && r.timestamp === room.timestamp))
         : [...prev, room]
+    );
+  };
+
+  const toggleTag = (tag: string) => {
+    setSelectedTags(prev => 
+      prev.includes(tag)
+        ? prev.filter(t => t !== tag)
+        : [...prev, tag]
     );
   };
 
@@ -125,41 +133,94 @@ export function RoomAnalysis({ videoId: muxPlaybackId, onComplete, onSkip }: Roo
     );
   }
 
-  if (rooms) {
+  if (analysis) {
     return (
       <div className="space-y-6 p-4">
+        {/* Property Info */}
+        {analysis.propertyInfo && (
+          <div className="space-y-2">
+            <h3 className="font-medium">Property Details</h3>
+            <div className="flex gap-4">
+              {analysis.propertyInfo.bedrooms && (
+                <div className="flex items-center gap-1">
+                  <Bed className="w-4 h-4 text-gray-500" />
+                  <span>{analysis.propertyInfo.bedrooms} beds</span>
+                </div>
+              )}
+              {analysis.propertyInfo.bathrooms && (
+                <div className="flex items-center gap-1">
+                  <Bath className="w-4 h-4 text-gray-500" />
+                  <span>{analysis.propertyInfo.bathrooms} baths</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Rooms */}
         <div className="space-y-2">
           <h3 className="font-medium">Identified Rooms</h3>
           <p className="text-sm text-gray-500">Select the rooms you want to include in your tour.</p>
+          <div className="flex flex-wrap gap-2">
+            {analysis.rooms.map((room, index) => {
+              const isSelected = selectedRooms.some(
+                r => r.room === room.room && r.timestamp === room.timestamp
+              );
+              return (
+                <button
+                  key={index}
+                  onClick={() => toggleRoom(room)}
+                  className={cn(
+                    "group flex items-center gap-2 px-3 py-1.5 rounded-full text-sm transition-colors",
+                    isSelected
+                      ? "bg-slate-800 text-white hover:bg-slate-700"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  )}
+                >
+                  <span>{room.room}</span>
+                  <span className="text-xs opacity-60">{room.timestamp}</span>
+                  <X className={cn(
+                    "w-4 h-4 transition-colors",
+                    isSelected
+                      ? "text-white/60 group-hover:text-white"
+                      : "text-gray-400 group-hover:text-gray-600"
+                  )} />
+                </button>
+              );
+            })}
+          </div>
         </div>
-        
-        <div className="flex flex-wrap gap-2">
-          {rooms.map((room, index) => {
-            const isSelected = selectedRooms.some(
-              r => r.room === room.room && r.timestamp === room.timestamp
-            );
-            return (
-              <button
-                key={index}
-                onClick={() => toggleRoom(room)}
-                className={cn(
-                  "group flex items-center gap-2 px-3 py-1.5 rounded-full text-sm transition-colors",
-                  isSelected
-                    ? "bg-slate-800 text-white hover:bg-slate-700"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                )}
-              >
-                <span>{room.room}</span>
-                <span className="text-xs opacity-60">{room.timestamp}</span>
-                <X className={cn(
-                  "w-4 h-4 transition-colors",
-                  isSelected
-                    ? "text-white/60 group-hover:text-white"
-                    : "text-gray-400 group-hover:text-gray-600"
-                )} />
-              </button>
-            );
-          })}
+
+        {/* Tags */}
+        <div className="space-y-2">
+          <h3 className="font-medium">Features & Amenities</h3>
+          <p className="text-sm text-gray-500">Select the features to highlight in your listing.</p>
+          <div className="flex flex-wrap gap-2">
+            {analysis.tags.map((tag, index) => {
+              const isSelected = selectedTags.includes(tag);
+              return (
+                <button
+                  key={index}
+                  onClick={() => toggleTag(tag)}
+                  className={cn(
+                    "group flex items-center gap-2 px-3 py-1.5 rounded-full text-sm transition-colors",
+                    isSelected
+                      ? "bg-slate-800 text-white hover:bg-slate-700"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  )}
+                >
+                  <Tag className="w-3 h-3" />
+                  <span>{tag}</span>
+                  <X className={cn(
+                    "w-4 h-4 transition-colors",
+                    isSelected
+                      ? "text-white/60 group-hover:text-white"
+                      : "text-gray-400 group-hover:text-gray-600"
+                  )} />
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div className="flex justify-between pt-4">
@@ -167,7 +228,11 @@ export function RoomAnalysis({ videoId: muxPlaybackId, onComplete, onSkip }: Roo
             Skip
           </Button>
           <Button 
-            onClick={() => onComplete(selectedRooms)}
+            onClick={() => onComplete({
+              rooms: selectedRooms,
+              propertyInfo: analysis.propertyInfo,
+              tags: selectedTags
+            })}
             disabled={selectedRooms.length === 0}
           >
             Continue

@@ -35,6 +35,11 @@ interface CreateVideoInput {
   description?: string;
   available?: boolean;
   rooms?: any;
+  tags?: string[];
+  propertyInfo?: {
+    bedrooms?: number;
+    bathrooms?: number;
+  };
 }
 
 export async function createVideo({

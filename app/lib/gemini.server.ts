@@ -11,6 +11,15 @@ export type Room = {
   timestamp: string;
 };
 
+export type VideoAnalysis = {
+  rooms: Room[];
+  propertyInfo: {
+    bedrooms?: number;
+    bathrooms?: number;
+  };
+  tags: string[];
+};
+
 export async function isMuxVideoReady(muxPlaybackId: string, maxAttempts = 100): Promise<boolean> {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
@@ -59,16 +68,20 @@ export async function getMuxVideo(muxPlaybackId: string, maxAttempts = 10): Prom
   throw new Error("Failed to fetch video");
 }
 
-export async function analyzeVideo(muxPlaybackId: string): Promise<Room[]> {
+export async function analyzeVideo(muxPlaybackId: string): Promise<VideoAnalysis> {
+  console.log("\n=== Starting Video Analysis ===");
+  console.log(`Analyzing video: ${muxPlaybackId}`);
+  
   // Get video from Mux with retries
   const arrayBuffer = await getMuxVideo(muxPlaybackId);
   const base64Data = Buffer.from(arrayBuffer).toString('base64');
+  console.log("Video data fetched and converted to base64");
   
   // Initialize Gemini
   const model = genAI.getGenerativeModel({
     model: "gemini-2.0-flash",
     generationConfig: {
-      temperature: 0.7, // Lower temperature for more consistent output
+      temperature: 0.7,
       topP: 0.8,
       topK: 40,
       maxOutputTokens: 8192,
@@ -93,11 +106,38 @@ export async function analyzeVideo(muxPlaybackId: string): Promise<Room[]> {
         role: "user",
         parts: [
           {
-            text: `Analyze this apartment tour video and identify what rooms are shown and at what timestamps.
-Respond ONLY with a JSON array in this exact format, with no additional text or explanation:
-[{"room": "Living Room", "timestamp": "0:00"}, {"room": "Kitchen", "timestamp": "1:23"}].
-For rooms that aren't clearly identifiable, use "Room 1", "Room 2", etc.
-Always label bathrooms as "Bathroom" and kitchens as "Kitchen".`
+            text: `Analyze this apartment tour video and identify:
+1. What rooms are shown and at what timestamps
+2. The number of bedrooms and bathrooms
+3. Notable features, amenities, and style elements
+
+Respond ONLY with a JSON object in this exact format, with no additional text or explanation:
+
+{
+  "rooms": [
+    {
+      "room": "Living Room",
+      "timestamp": "0:00"
+    }
+  ],
+  "propertyInfo": {
+    "bedrooms": 2,
+    "bathrooms": 1.5
+  },
+  "tags": [
+    "washer/dryer",
+    "hardwood floors",
+    "modern kitchen",
+    "stainless appliances"
+  ]
+}
+
+Notes:
+- For rooms that aren't clearly identifiable, use "Room 1", "Room 2", etc.
+- Always label bathrooms as "Bathroom" and kitchens as "Kitchen"
+- If you can't determine bedrooms or bathrooms count, omit those fields
+- Include any notable features, amenities, or style elements as tags
+- Keep tags simple and descriptive`
           }
         ],
       }
@@ -105,19 +145,24 @@ Always label bathrooms as "Bathroom" and kitchens as "Kitchen".`
   });
 
   try {
-    const result = await chatSession.sendMessage("Return the room analysis as JSON");
+    console.log("Sending request to Gemini...");
+    const result = await chatSession.sendMessage("Return the video analysis as JSON");
     const text = result.response.text().trim();
+    console.log("\nRaw Gemini Response:");
+    console.log(text);
     
     // Try to extract JSON if it's wrapped in other text
-    const jsonMatch = text.match(/\[.*\]/s);
+    const jsonMatch = text.match(/\{.*\}/s);
     if (!jsonMatch) {
-      throw new Error("No JSON array found in response");
+      throw new Error("No JSON object found in response");
     }
 
-    const rooms = JSON.parse(jsonMatch[0]);
+    const analysis = JSON.parse(jsonMatch[0]) as VideoAnalysis;
+    console.log("\nParsed Analysis:");
+    console.log(JSON.stringify(analysis, null, 2));
     
     // Validate the structure
-    if (!Array.isArray(rooms) || !rooms.every(room => 
+    if (!analysis.rooms || !Array.isArray(analysis.rooms) || !analysis.rooms.every(room => 
       typeof room === 'object' && 
       typeof room.room === 'string' && 
       typeof room.timestamp === 'string'
@@ -125,10 +170,31 @@ Always label bathrooms as "Bathroom" and kitchens as "Kitchen".`
       throw new Error("Invalid room data structure");
     }
 
-    return rooms;
+    // Ensure propertyInfo exists
+    analysis.propertyInfo = analysis.propertyInfo || {};
+    
+    // Ensure tags exist and are strings
+    analysis.tags = Array.isArray(analysis.tags) 
+      ? analysis.tags.filter(tag => typeof tag === 'string')
+      : [];
+
+    console.log("\nFinal Analysis Result:");
+    console.log(JSON.stringify({
+      rooms: analysis.rooms.length,
+      propertyInfo: analysis.propertyInfo,
+      tags: analysis.tags.length
+    }, null, 2));
+
+    return analysis;
   } catch (error) {
-    console.error("Failed to parse room data:", error);
+    console.error("\nError during analysis:", error);
     // Return a safe fallback
-    return [{ room: "Room 1", timestamp: "0:00" }];
+    const fallback = {
+      rooms: [{ room: "Room 1", timestamp: "0:00" }],
+      propertyInfo: {},
+      tags: []
+    };
+    console.log("Returning fallback:", fallback);
+    return fallback;
   }
 }

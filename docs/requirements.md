@@ -61,7 +61,7 @@ As a renter, I want to contact property managers
 ## Story 1: Video Processing Status
 **As a property manager**, I want to track the AI analysis of my video tour
 - [x] Video is automatically sent to Gemini for analysis after Mux upload completes
-- [ ] Analysis progress is shown in a dedicated pane during listing creation
+- [x] Analysis progress is shown in a dedicated pane during listing creation
 - [x] Progress updates are shown with a clear status indicator
 - [x] Error states are clearly displayed with error messages
 - [x] A retry button is available if analysis fails
@@ -77,19 +77,19 @@ As a renter, I want to contact property managers
 
 ## Story 3: Field Recognition
 **As a property manager**, I want the AI to extract listing fields from my video
-- [ ] AI identifies number of bedrooms and bathrooms
-- [ ] AI identifies property type (apartment, house, studio, etc.)
-- [ ] AI detects key amenities (washer/dryer, dishwasher, etc.)
-- [ ] Extracted fields are returned in structured JSON format
-- [ ] Fields can be used for search and filtering
+- [x] AI identifies number of bedrooms and bathrooms
+- [x] AI identifies property type (apartment, house, studio, etc.)
+- [x] AI detects key amenities (washer/dryer, dishwasher, etc.)
+- [x] Extracted fields are returned in structured JSON format
+- [x] Fields can be used for search and filtering
 
 ## Story 4: Auto-Tagging
 **As a property manager**, I want the AI to generate relevant tags for my listing
-- [ ] AI generates tags based on video content and features
-- [ ] Tags cover amenities, styles, and property features
-- [ ] Tags are standardized for consistent searching
-- [ ] Tags are stored in structured JSON format
-- [ ] Tags can be reviewed and modified by user
+- [x] AI generates tags based on video content and features
+- [x] Tags cover amenities, styles, and property features
+- [x] Tags are standardized for consistent searching
+- [x] Tags are stored in structured JSON format
+- [x] Tags can be reviewed and modified by user
 
 ## AI Feature II: AI Chat
 

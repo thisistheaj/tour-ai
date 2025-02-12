@@ -65,6 +65,7 @@ model Video {
   bathrooms     Int?
   description   String?  @db.Text
   available     Boolean  @default(true)
+  tags          String[] @default([])
 
   userId        String
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)

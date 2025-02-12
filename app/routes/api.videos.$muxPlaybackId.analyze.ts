@@ -17,9 +17,14 @@ export const loader = async ({ request, params }: LoaderFunctionArgs) => {
   }
 
   try {
-    const rooms = await analyzeVideo(muxPlaybackId);
+    const analysis = await analyzeVideo(muxPlaybackId);
 
-    return json({ success: true, rooms });
+    return json({ 
+      success: true, 
+      rooms: analysis.rooms,
+      propertyInfo: analysis.propertyInfo,
+      tags: analysis.tags
+    });
   } catch (error) {
     console.error("Error analyzing rooms:", error);
     if (error instanceof Error && error.message.includes("Failed to fetch video")) {

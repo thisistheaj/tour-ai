@@ -23,7 +23,19 @@ import {
 import { CheckCircle2, Heart, Share2, Bed, Bath, ChevronUp, Mail, Play } from "lucide-react";
 import { AddressPicker } from "~/components/ui/address-picker";
 import { RoomAnalysis } from "~/components/room-analysis";
-import type { Room } from "~/lib/gemini.server";
+import type { Room, VideoAnalysis } from "~/lib/gemini.server";
+
+interface FormFields {
+  title?: string;
+  price?: string;
+  address?: string;
+  city?: string;
+  bedrooms?: string;
+  bathrooms?: string;
+  description?: string;
+  available?: string;
+  [key: string]: string | undefined;
+}
 
 export const action = async ({ request }: ActionFunctionArgs) => {
   const userId = await requireUserId(request);
@@ -74,18 +86,21 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   // Step 3: Property Details & Final Submission
   if (step === "3") {
-    const price = formData.get("price");
-    const address = formData.get("address");
-    const city = formData.get("city");
-    const bedrooms = formData.get("bedrooms");
-    const bathrooms = formData.get("bathrooms");
-    const description = formData.get("description");
+    const title = formData.get("title") as string;
+    const assetId = formData.get("assetId") as string;
+    const playbackId = formData.get("playbackId") as string;
+    const price = formData.get("price") as string;
+    const address = formData.get("address") as string;
+    const city = formData.get("city") as string;
+    const bedrooms = formData.get("bedrooms") as string;
+    const bathrooms = formData.get("bathrooms") as string;
+    const description = formData.get("description") as string;
     const available = formData.get("available") === "on";
-    const assetId = formData.get("assetId");
-    const playbackId = formData.get("playbackId");
-    const rooms = formData.get("rooms");
+    const rooms = JSON.parse(formData.get("rooms") as string);
+    const tags = JSON.parse(formData.get("tags") as string);
+    const propertyInfo = JSON.parse(formData.get("propertyInfo") as string);
 
-    if (!price || !address || !city || !bedrooms || !bathrooms || !description || !assetId || !playbackId) {
+    if (!title || !assetId || !playbackId || !price || !address || !city || !bedrooms || !bathrooms || !description) {
       return json(
         { errors: { form: "All fields are required" } },
         { status: 400 }
@@ -94,24 +109,26 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
     try {
       await createVideo({
-        title: title as string,
+        title,
         userId,
-        muxAssetId: assetId as string,
-        muxPlaybackId: playbackId as string,
+        muxAssetId: assetId,
+        muxPlaybackId: playbackId,
         status: "ready",
-        price: parseFloat(price as string),
-        address: address as string,
-        city: city as string,
-        bedrooms: parseInt(bedrooms as string),
-        bathrooms: parseInt(bathrooms as string),
-        description: description as string,
+        price: parseFloat(price),
+        address,
+        city,
+        bedrooms: parseInt(bedrooms, 10),
+        bathrooms: parseFloat(bathrooms),
+        description,
         available,
-        rooms: rooms ? JSON.parse(rooms as string) : null,
+        rooms,
+        tags,
+        propertyInfo
       });
 
       return redirect("/manager");
     } catch (error) {
-      console.error("Error creating listing:", error);
+      console.error("Error creating video:", error);
       return json(
         { errors: { form: "Error creating listing" } },
         { status: 500 }
@@ -136,7 +153,7 @@ export default function NewListing() {
   const [uploadId, setUploadId] = useState<string | null>(null);
   const [uploadUrl, setUploadUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [formData, setFormData] = useState<any>(null);
+  const [formData, setFormData] = useState<FormFields | null>(null);
   const [videoData, setVideoData] = useState<{
     assetId: string;
     playbackId: string;
@@ -145,7 +162,7 @@ export default function NewListing() {
   } | null>(null);
   const [selectedAddress, setSelectedAddress] = useState("");
   const [selectedCity, setSelectedCity] = useState("austin");
-  const [analyzedRooms, setAnalyzedRooms] = useState<Room[] | null>(null);
+  const [analyzedRooms, setAnalyzedRooms] = useState<VideoAnalysis | null>(null);
 
   const stepTitles = {
     1: { title: "Record Tour", description: "Share a video walkthrough of your property" },
@@ -179,33 +196,50 @@ export default function NewListing() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const data = new FormData(e.currentTarget);
+    const formDataObj = Object.fromEntries(new FormData(e.currentTarget)) as FormFields;
     
     if (step === 3) {
       // Store form data and move to confirmation step
-      setFormData(Object.fromEntries(data.entries()));
+      setFormData(formDataObj);
       setStep(4);
     } else if (step === 4) {
-      // Final submission - include rooms data
+      // Final submission - include analysis data
       const form = document.createElement('form');
       form.method = 'post';
       
-      // Add rooms data to form
+      // Add form fields
+      if (formData) {
+        Object.entries(formData).forEach(([key, value]) => {
+          if (value !== undefined) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = value;
+            form.appendChild(input);
+          }
+        });
+      }
+
+      // Add analysis data
       if (analyzedRooms) {
         const roomsInput = document.createElement('input');
         roomsInput.type = 'hidden';
         roomsInput.name = 'rooms';
-        roomsInput.value = JSON.stringify(analyzedRooms);
+        roomsInput.value = JSON.stringify(analyzedRooms.rooms);
         form.appendChild(roomsInput);
+
+        const tagsInput = document.createElement('input');
+        tagsInput.type = 'hidden';
+        tagsInput.name = 'tags';
+        tagsInput.value = JSON.stringify(analyzedRooms.tags);
+        form.appendChild(tagsInput);
+
+        const propertyInfoInput = document.createElement('input');
+        propertyInfoInput.type = 'hidden';
+        propertyInfoInput.name = 'propertyInfo';
+        propertyInfoInput.value = JSON.stringify(analyzedRooms.propertyInfo);
+        form.appendChild(propertyInfoInput);
       }
-      
-      Object.entries(formData).forEach(([key, value]) => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = key;
-        input.value = value as string;
-        form.appendChild(input);
-      });
       
       document.body.appendChild(form);
       form.submit();
@@ -278,8 +312,16 @@ export default function NewListing() {
             ) : step === 2 ? (
               <RoomAnalysis
                 videoId={videoData?.playbackId || ""}
-                onComplete={(rooms) => {
-                  setAnalyzedRooms(rooms);
+                onComplete={(analysis) => {
+                  setAnalyzedRooms(analysis);
+                  // Pre-fill bedrooms and bathrooms if detected
+                  if (analysis.propertyInfo.bedrooms || analysis.propertyInfo.bathrooms) {
+                    setFormData(prev => ({
+                      ...prev,
+                      bedrooms: analysis.propertyInfo.bedrooms?.toString() || "",
+                      bathrooms: analysis.propertyInfo.bathrooms?.toString() || ""
+                    }));
+                  }
                   setStep(3);
                 }}
                 onSkip={() => setStep(3)}
@@ -317,6 +359,7 @@ export default function NewListing() {
                       min="0"
                       placeholder="# of bedrooms"
                       required
+                      defaultValue={formData?.bedrooms || ""}
                     />
                   </div>
 
@@ -330,6 +373,7 @@ export default function NewListing() {
                       step="0.5"
                       placeholder="# of bathrooms"
                       required
+                      defaultValue={formData?.bathrooms || ""}
                     />
                   </div>
                 </div>
