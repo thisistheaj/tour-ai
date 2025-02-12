@@ -621,7 +621,7 @@ export default function FeedPage() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="absolute right-4 bottom-32 flex flex-col gap-6"
+                    className="absolute right-4 top-32 flex flex-col gap-6"
                   >
                     <button 
                       onClick={() => handleSave(video.id, savedStates[index])}

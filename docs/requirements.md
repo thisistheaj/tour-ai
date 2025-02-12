@@ -95,27 +95,27 @@ As a renter, I want to contact property managers
 
 ## Story 5: Chat Interface
 **As a renter**, I want to chat with AI about apartment listings
-- [ ] Chat interface is accessible via a persistent chat bubble
-- [ ] Chat bubble is positioned at the bottom of the video feed
-- [ ] Chat interface opens in an overlay without interrupting video playback
-- [ ] Chat maintains context about the current listing being viewed
-- [ ] AI responses are based on listing details and video analysis
+- [x] Chat interface is accessible via a persistent chat bubble
+- [x] Chat bubble is positioned at the bottom of the video feed
+- [x] Chat interface opens in an overlay without interrupting video playback
+- [x] Chat maintains context about the current listing being viewed
+- [x] AI responses are based on listing details and video analysis
 
 ## Story 6: Room Navigation
 **As a renter**, I want to use chat to navigate to specific rooms in the video
-- [ ] Can ask natural language questions about specific rooms
-- [ ] AI recognizes room-related queries (e.g., "show me the kitchen")
-- [ ] Video automatically jumps to the timestamp of the requested room
-- [ ] AI provides context about the room being shown
-- [ ] Navigation works with all identified room types
+- [x] Can ask natural language questions about specific rooms
+- [x] AI recognizes room-related queries (e.g., "show me the kitchen")
+- [x] Video automatically jumps to the timestamp of the requested room
+- [x] AI provides context about the room being shown
+- [x] Navigation works with all identified room types
 
 ## Story 7: Listing Information Queries
 **As a renter**, I want to ask the AI specific questions about the listing
-- [ ] Can ask about property features and amenities
-- [ ] Can ask about pricing and availability
-- [ ] Can ask about location and neighborhood
-- [ ] AI responses are based on listing data and video analysis
-- [ ] AI indicates if requested information is not available
+- [x] Can ask about property features and amenities
+- [x] Can ask about pricing and availability
+- [x] Can ask about location and neighborhood
+- [x] AI responses are based on listing data and video analysis
+- [x] AI indicates if requested information is not available
 
 ## AI Feature III: Smart Filtering
 
