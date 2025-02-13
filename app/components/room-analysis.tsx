@@ -67,18 +67,7 @@ export function RoomAnalysis({ videoId: muxPlaybackId, onComplete, onSkip }: Roo
       setSelectedTags(data.tags);
       setIsAIWatching(false);
       
-      // Pass complete analysis to parent
-      const completeAnalysis = {
-        rooms: data.rooms,
-        propertyInfo: data.propertyInfo || { bedrooms: undefined, bathrooms: undefined },
-        tags: data.tags,
-        videoDescription: data.videoDescription || "No detailed walkthrough available"
-      };
-
-      console.log("\n=== Room Analysis Component: Passing to Parent ===");
-      console.log("Video Description being passed:", completeAnalysis.videoDescription);
-
-      onComplete(completeAnalysis);
+      // Remove immediate onComplete call - user will trigger via Continue button
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to identify rooms");
       setIsWaitingForMux(false);
@@ -89,6 +78,22 @@ export function RoomAnalysis({ videoId: muxPlaybackId, onComplete, onSkip }: Roo
   useEffect(() => {
     analyzeRooms();
   }, [muxPlaybackId]);
+
+  const handleContinue = () => {
+    if (!analysis) return;
+    
+    const completeAnalysis = {
+      rooms: selectedRooms,
+      propertyInfo: analysis.propertyInfo || { bedrooms: undefined, bathrooms: undefined },
+      tags: selectedTags,
+      videoDescription: analysis.videoDescription || "No detailed walkthrough available"
+    };
+
+    console.log("\n=== Room Analysis Component: User Confirmed Analysis ===");
+    console.log("Video Description being passed:", completeAnalysis.videoDescription);
+
+    onComplete(completeAnalysis);
+  };
 
   const toggleRoom = (room: Room) => {
     setSelectedRooms(prev => 
@@ -185,6 +190,7 @@ export function RoomAnalysis({ videoId: muxPlaybackId, onComplete, onSkip }: Roo
               return (
                 <button
                   key={index}
+                  type="button"
                   onClick={() => toggleRoom(room)}
                   className={cn(
                     "group flex items-center gap-2 px-3 py-1.5 rounded-full text-sm transition-colors",
@@ -217,6 +223,7 @@ export function RoomAnalysis({ videoId: muxPlaybackId, onComplete, onSkip }: Roo
               return (
                 <button
                   key={index}
+                  type="button"
                   onClick={() => toggleTag(tag)}
                   className={cn(
                     "group flex items-center gap-2 px-3 py-1.5 rounded-full text-sm transition-colors",
@@ -244,12 +251,7 @@ export function RoomAnalysis({ videoId: muxPlaybackId, onComplete, onSkip }: Roo
             Skip
           </Button>
           <Button 
-            onClick={() => onComplete({
-              rooms: selectedRooms,
-              propertyInfo: analysis.propertyInfo,
-              tags: selectedTags,
-              videoDescription: analysis.videoDescription || "No detailed walkthrough available"
-            })}
+            onClick={handleContinue}
             disabled={selectedRooms.length === 0}
           >
             Continue
