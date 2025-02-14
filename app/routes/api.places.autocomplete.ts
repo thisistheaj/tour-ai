@@ -30,7 +30,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       });
     }
 
-    return json({ predictions: data.predictions });
+    return json({ predictions: data.predictions.slice(0, 3) });
   } catch (error) {
     return json({ 
       error: { message: "Failed to fetch suggestions" },

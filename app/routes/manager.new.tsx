@@ -567,7 +567,11 @@ export default function NewListing() {
                 <Button 
                   type="submit" 
                   className={step === 1 ? "w-full" : ""}
-                  disabled={isUploading || navigation.state === "submitting"}
+                  disabled={
+                    isUploading || 
+                    navigation.state === "submitting" || 
+                    (step === 3 && !selectedAddress) // Disable Preview Tour if no address
+                  }
                 >
                   {isUploading 
                     ? "Uploading..." 
@@ -576,7 +580,9 @@ export default function NewListing() {
                       : step === 1
                       ? "Continue to Room Analysis"
                       : step === 3
-                      ? "Preview Tour"
+                      ? selectedAddress
+                        ? "Preview Tour"
+                        : "Add Location to Continue"
                       : "Share Tour"
                   }
                 </Button>

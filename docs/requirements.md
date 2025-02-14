@@ -196,7 +196,7 @@ As a renter, I want to contact property managers
 -[x] screen size on load
 -[x] mute by default
 -[x] replace video in edit
--[ ] fix '/apple-touch-icon.png' 404 error
+-[ ] fix '/apple-touch-icon.png' 404 error (possibly resolved?)
 -[ ] fix video controls + gesture conflict
 
 ### Demo Videos
@@ -214,3 +214,48 @@ As a renter, I want to contact property managers
 -[x] find enhancements
 -[x] vet user stories 
 -[ ] test long descriptions
+
+### testing plan
+
+-[x] upload video
+  -[x] multiple sizes
+    -by step:
+    -[x] to mux
+    -[x] to gemini
+    -[x] to db
+    -buy size:
+    -[x] ~30secs => 5/5x
+    -[x] ~1:15 => 5/5x
+    -by network conditions
+    -[x] poor network => 2/5x
+  -[x] remove tags
+  -[x] remove timestamps
+  -[x] remove remove fields?
+  -[x] any UX improvements?
+  -[x] description gets into db
+-[x] Edit listing
+    -[x] video
+-[ ] Feed
+    -[x] swipe up/down agressively
+    -[x] like
+    -[x] share
+    -[x] email
+    -[-] double tap to like
+    -[ ] open chat
+        -[x] basic message UI Improvements
+            -[ ] scrolling
+        -[x] RAG on data in video description
+            -[ ] reliability
+        -[x] accurate timestamp use 
+            -[ ] reliability
+-[x] Navigation
+-[x] Settings
+-[?] Renter view 
+
+### Changes
+
+-[ ] slection validation for location picker
+-[ ] location picker overflow
+-[ ] drafts
+-[ ] chat scrollview
+
