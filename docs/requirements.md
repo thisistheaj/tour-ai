@@ -254,8 +254,8 @@ As a renter, I want to contact property managers
 
 ### Changes
 
--[ ] slection validation for location picker
--[ ] location picker overflow
+-[x] slection validation for location picker
+-[x] location picker overflow
 -[ ] drafts
 -[ ] chat scrollview
 
